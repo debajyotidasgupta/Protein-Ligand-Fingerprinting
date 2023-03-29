@@ -1,4 +1,4 @@
-from fingerprint.parser import *
+from fingerprint import *
 
 if __name__ == '__main__':
     # Create a new instance of the class
@@ -7,5 +7,6 @@ if __name__ == '__main__':
     # Load the PDB file
     protein_ligand_complex.load_pdb("data/2xni.pdb")
 
-    for atom in protein_ligand_complex.protein.atoms[:20]:
-        print(atom)
+    # Print the protein fingerprint
+    fingerprint = NeighbourFingerprint(protein_ligand_complex)
+    print(fingerprint.get_fingerprint())
