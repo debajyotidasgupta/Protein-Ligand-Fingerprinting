@@ -10,7 +10,16 @@ class Atom:
         self.z = z
 
     def __repr__(self):
-        return f"{self.atom_name}:{self.residue_name}:{self.chain_id}{self.residue_id}:{self.x},{self.y},{self.z}"
+        return f"ATOM: \n\
+        atom_id: {self.atom_id} \n\
+        atom_name: {self.atom_name} \n\
+        residue_name: {self.residue_name} \n\
+        chain_id: {self.chain_id} \n\
+        residue_id: {self.residue_id} \n\
+        x: {self.x} \n\
+        y: {self.y} \n\
+        z: {self.z} \n\
+        "
 
 
 class Protein:
@@ -24,6 +33,15 @@ class Protein:
         chain.append(atom)
         self.chains[atom.chain_id] = chain
 
+    def get_atoms(self):
+        return self.atoms
+
+    def __repr__(self) -> str:
+        return f"Protein: \n\
+        atoms: {len(self.atoms)} \n\
+        chains: {len(self.chains)} \n\
+        "
+
 
 class Ligand:
     def __init__(self):
@@ -31,6 +49,11 @@ class Ligand:
 
     def add_atom(self, atom):
         self.atoms.append(atom)
+
+    def __repr__(self) -> str:
+        return f"Ligand: \n\
+        atoms: {len(self.atoms)} \n\
+        "
 
 
 class ProteinLigandComplex:
@@ -53,7 +76,8 @@ class ProteinLigandComplex:
                 y = float(line[38:46])
                 z = float(line[46:54])
 
-                atom = Atom(atom_id, atom_name, residue_name, chain_id, residue_id, x, y, z)
+                atom = Atom(atom_id, atom_name, residue_name,
+                            chain_id, residue_id, x, y, z)
 
                 if line.startswith("ATOM"):
                     self.protein.add_atom(atom)
@@ -61,4 +85,7 @@ class ProteinLigandComplex:
                     self.ligand.add_atom(atom)
 
     def __repr__(self):
-        return f"ProteinLigandComplex with {len(self.protein.atoms)} protein atoms and {len(self.ligand.atoms)} ligand atoms."
+        return f"ProteinLigandComplex: \n\
+        protein: {self.protein} \n\
+        ligand: {self.ligand} \n\
+        "
