@@ -9,6 +9,9 @@ class Atom:
         self.y = y
         self.z = z
 
+    def get_atom_name(self):
+        return self.atom_name
+
     def __repr__(self):
         return f"ATOM: \n\
         atom_id: {self.atom_id} \n\
