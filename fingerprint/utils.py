@@ -1,6 +1,6 @@
 from typing import List
-from parser import Atom, Protein
-from distance import euclidean_distance
+from .parser import Atom, Protein
+from .distance import euclidean_distance
 
 
 def distance_search(

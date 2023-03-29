@@ -1,4 +1,4 @@
-from parser import Atom
+from .parser import Atom
 
 
 def euclidean_distance(atom1: Atom, atom2: Atom) -> float:
