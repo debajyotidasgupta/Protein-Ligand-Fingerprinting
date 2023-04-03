@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class BaseFingerprint:
     def __init__(self, pdb, *args, **kwargs):
         self.pdb = pdb
@@ -14,3 +17,6 @@ class BaseFingerprint:
 
     def get_fingerprint_length(self):
         return len(self.fingerprint)
+
+    def save_fingerprint(self, file_path):
+        raise NotImplementedError

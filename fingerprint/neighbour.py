@@ -1,13 +1,21 @@
 from .base import *
 from .utils import *
-import numpy as np
+from .parser import *
 from tqdm import tqdm
 
 
 class NeighbourFingerprint(BaseFingerprint):
-    def __init__(self, pdb, *args, **kwargs):
+    def __init__(self, pdb: ProteinLigandComplex, *args, **kwargs):
+        """The NeighbourFingerprint class is used to generate a fingerprint of the protein-ligand complex.
+        Args:
+            pdb (ProteinLigandComplex): The protein-ligand complex.
+
+        Returns:
+            None
+        """
         super(NeighbourFingerprint, self).__init__(pdb, *args, **kwargs)
 
+        # Define the coding scheme
         self.coding = {
             'N': 0,
             'CA': 1,
@@ -22,11 +30,11 @@ class NeighbourFingerprint(BaseFingerprint):
         # Get the protein
         protein = self.get_pdb().protein
 
-        # Get the atoms
-        atoms = protein.atoms
+        # Get the atoms of ligand
+        atoms = self.get_pdb().ligand.atoms
 
         # Create fingerprint
-        fingerprints = np.zeros((len(protein.atoms), 5))
+        fingerprints = np.zeros((len(protein.atoms), 5), dtype=np.uint8)
 
         # Iterate over the atoms
         for pos, atom in tqdm(list(enumerate(atoms)), desc='Parsing Neighbours'):
@@ -45,3 +53,6 @@ class NeighbourFingerprint(BaseFingerprint):
                 fingerprints[pos][index] += 1
 
         return fingerprints
+
+    def save_fingerprint(self, file_path):
+        np.savetxt(file_path, self.fingerprint, fmt='%d')
