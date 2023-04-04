@@ -49,11 +49,7 @@ pdb_ids = []
 features = []
 labels = []
 
-i = 0
 for _, row in dataset.iterrows():
-    if i>=10:
-        break
-    i+=1
     pdb_id = row['pdb_id']
     label = row['label']
 
@@ -73,7 +69,10 @@ for _, row in dataset.iterrows():
     labels.append(label)
 
 pdb_ids = np.array(pdb_ids)
-# features = np.stack(features)
+max_shape = tuple(max(i) for i in zip(*[a.shape for a in features]))
+padded_arrays = [np.pad(a, [(0, max_shape[0] - a.shape[0]), (0, max_shape[1] - a.shape[1])], 'constant') for a in features]
+padded_arrays = [a.reshape(a.shape[0]*a.shape[1]) for a in padded_arrays]
+features = np.stack(padded_arrays)
 labels = np.array(labels)
 
 dataset = dc.data.NumpyDataset(X=features, y=labels, ids=pdb_ids)
@@ -89,8 +88,8 @@ metric = dc.metrics.Metric(dc.metrics.pearson_r2_score)
 train_comparision = list(zip(model.predict(train_dataset), train_dataset.y))
 test_comparision = list(zip(model.predict(test_dataset), test_dataset.y))
 
-open(os.path.join(output_dir, 'train_comparision'), 'w').write(train_comparision)
-open(os.path.join(output_dir, 'test_comparision'), 'w').write(test_comparision)
+open(os.path.join(output_dir, 'train_comparision'), 'w').write(str(train_comparision))
+open(os.path.join(output_dir, 'test_comparision'), 'w').write(str(test_comparision))
 
 evaluator = Evaluator(model, train_dataset, [])
 train_r2score = evaluator.compute_model_performance([metric])
