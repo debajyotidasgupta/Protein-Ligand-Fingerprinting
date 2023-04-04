@@ -17,9 +17,12 @@ if __name__ == '__main__':
     # Load the PDB file
     protein_ligand_complex.load_pdb(args.pdb)
 
-    # Print the protein fingerprint
-    fingerprint = NeighbourFingerprint(protein_ligand_complex)
-    print(fingerprint.get_fingerprint())
+    # # Print the protein fingerprint
+    # fingerprint = NeighbourFingerprint(protein_ligand_complex)
+    # print(fingerprint.get_fingerprint())
 
-    # Save the fingerprint
-    fingerprint.save_fingerprint(args.output)
+    # # Save the fingerprint
+    # fingerprint.save_fingerprint(args.output)
+
+    # Print the protein
+    print(protein_ligand_complex.protein.atoms[0])
