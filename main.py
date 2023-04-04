@@ -25,4 +25,7 @@ if __name__ == '__main__':
     # fingerprint.save_fingerprint(args.output)
 
     # Print the protein
-    print(protein_ligand_complex.protein.atoms[0])
+    seq = protein2seq(protein_ligand_complex.protein)
+    vec = KmerVec(0, k=2)
+    vec.set_kmer_set()
+    print(vec.vectorize(seq))

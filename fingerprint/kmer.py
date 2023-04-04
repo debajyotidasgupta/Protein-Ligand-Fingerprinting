@@ -2,7 +2,7 @@ import itertools
 import numpy as np
 from numpy.typing import NDArray
 from typing import Union, Set, Generator
-from collections import Counter
+from collections import Counter, defaultdict
 
 from .utils import check_list, reduce
 from .alphabets import get_alphabet_keys, FULL_ALPHABETS
@@ -141,9 +141,9 @@ class KmerVec:
         self.vector = None
         self.basis = KmerBasis()
 
-    def set_kmer_set(self, kmer_set=list()):
+    def set_kmer_set(self, kmer_set=None):
         self.kmer_set = KmerSet(self.alphabet, self.k, kmer_set)
-        self.basis.set_basis(kmer_set)
+        self.basis.set_basis(list(self.kmer_set.kmers))
 
     # iteratively get all kmers in a string
     def _kmer_gen(self, sequence: str) -> Generator[str, None, None]:
@@ -186,7 +186,7 @@ class KmerVec:
         # vector = np.zeros(N)
 
         # memfix change
-        vector = {}
+        vector = defaultdict(int)
 
         for i, word in enumerate(self.kmer_set.kmers):
             vector[i] += kmer2count[word]
@@ -194,7 +194,7 @@ class KmerVec:
         # Convert to frequencies
         # vector /= sum(kmer2count.values())
 
-        return vector
+        return dict(vector)
 
     def reduce_vectorize(self, sequence: str) -> NDArray:
         """Simplify and vectorize sequence into reduced kmer vector.
