@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Atom:
     def __init__(self, atom_id, atom_name, residue_name, chain_id, residue_id, x, y, z):
         self.atom_id = atom_id
@@ -11,6 +14,9 @@ class Atom:
 
     def get_atom_name(self):
         return self.atom_name
+
+    def get_coordinates(self):
+        return np.array([self.x, self.y, self.z])
 
     def __repr__(self):
         return f"ATOM: \n\
@@ -39,6 +45,12 @@ class Protein:
     def get_atoms(self):
         return self.atoms
 
+    def get_coordinates(self):
+        coords = []
+        for atom in self.atoms:
+            coords.append(atom.get_coordinates())
+        return np.array(coords)
+
     def __repr__(self) -> str:
         return f"Protein: \n\
         atoms: {len(self.atoms)} \n\
@@ -52,6 +64,15 @@ class Ligand:
 
     def add_atom(self, atom):
         self.atoms.append(atom)
+
+    def get_atoms(self):
+        return self.atoms
+
+    def get_coordinates(self):
+        coords = []
+        for atom in self.atoms:
+            coords.append(atom.get_coordinates())
+        return np.array(coords)
 
     def __repr__(self) -> str:
         return f"Ligand: \n\
@@ -81,7 +102,7 @@ class ProteinLigandSideChainComplex:
     def load_pdb(self, file_path):
         with open(file_path, "r") as f:
             lines = f.readlines()
-        
+
         side_chain_atoms_dict = {}
 
         for line in lines:
@@ -96,12 +117,12 @@ class ProteinLigandSideChainComplex:
                 z = float(line[46:54])
 
                 atom = Atom(atom_id, atom_name, residue_name,
-                                chain_id, residue_id, x, y, z)
+                            chain_id, residue_id, x, y, z)
 
                 is_atom = False
                 if line.startswith("ATOM"):
                     is_atom = True
-                
+
                 if is_atom and atom_name.strip()[0] not in ['N', 'C', 'O', 'CA']:
                     if chain_id not in side_chain_atoms_dict:
                         side_chain_atoms_dict[chain_id] = {}
@@ -113,19 +134,20 @@ class ProteinLigandSideChainComplex:
                         self.protein.add_atom(atom)
                     else:
                         self.ligand.add_atom(atom)
-            
+
         side_chain_representative_atoms = []
         for chain_id in side_chain_atoms_dict.keys():
             for residue_id in side_chain_atoms_dict[chain_id].keys():
                 side_chain_atoms = side_chain_atoms_dict[chain_id][residue_id]
                 x, y, z, atom_id = self._compute_centroid(side_chain_atoms)
-                if atom_id>=0:
+                if atom_id >= 0:
                     atom = Atom(atom_id, "R", residue_name,
                                 chain_id, residue_id, x, y, z)
                     side_chain_representative_atoms.append(atom)
-        
-        sorter = lambda x : x.atom_id
-        self.protein.atoms = sorted(self.protein.atoms + side_chain_representative_atoms, key = sorter)
+
+        def sorter(x): return x.atom_id
+        self.protein.atoms = sorted(
+            self.protein.atoms + side_chain_representative_atoms, key=sorter)
 
     def __repr__(self):
         return f"ProteinLigandComplex: \n\

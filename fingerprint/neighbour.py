@@ -31,15 +31,15 @@ class NeighbourFingerprint(BaseFingerprint):
         protein = self.get_pdb().protein
 
         # Get the atoms of ligand
-        atoms = self.get_pdb().ligand.atoms
+        atoms = self.get_pdb().ligand.get_atoms()
 
         # Create fingerprint
-        fingerprints = np.zeros((len(protein.atoms), 5), dtype=np.uint8)
+        fingerprints = np.zeros((len(protein.atoms), 5))
 
         # Iterate over the atoms
         for pos, atom in tqdm(list(enumerate(atoms)), desc='Parsing Neighbours'):
             # Get the neighbours of the atom
-            neighbours = distance_search(atom, protein, distance)
+            neighbours = get_residues_near_atom(atom, protein, distance)
 
             # Iterate over the neighbours
             for neighbour in neighbours:
@@ -52,7 +52,8 @@ class NeighbourFingerprint(BaseFingerprint):
                 # Update the fingerprint
                 fingerprints[pos][index] += 1
 
-        return fingerprints
+        fingerprints += 1.
+        return fingerprints / np.sum(fingerprints, axis=0, keepdims=True)
 
     def save_fingerprint(self, file_path):
-        np.savetxt(file_path, self.fingerprint, fmt='%d')
+        np.savetxt(file_path, self.fingerprint)

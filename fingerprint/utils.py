@@ -1,9 +1,9 @@
 from typing import List
 from .parser import Atom, Protein
-from .distance import euclidean_distance
+from scipy.spatial import cKDTree
 
 
-def distance_search(
+def get_residues_near_atom(
     query: Atom,
     database: Protein,
     threshold: float,
@@ -19,18 +19,19 @@ def distance_search(
         List[Atom]: A list of atoms that are within the distance threshold.
     """
 
-    # Initialize the list of atoms that are within the distance threshold
-    atoms_within_threshold = []
+    # Get the coordinates of the query
+    query_coords = query.get_coordinates()
 
-    # Loop over all atoms in the database
-    for atom in database.atoms:
+    # Get the coordinates of the database
+    database_coords = database.get_coordinates()
 
-        # Calculate the distance between the query and the current atom
-        distance = euclidean_distance(query, atom)
+    # Create a KDTree
+    tree = cKDTree(database_coords)
 
-        # If the distance is less than the threshold, add the atom to the list
-        if distance < threshold:
-            atoms_within_threshold.append(atom)
+    # Query the KDTree
+    neighbours = tree.query_ball_point(query_coords, threshold)
 
-    # Return the list of atoms that are within the distance threshold
-    return atoms_within_threshold
+    # Get the atoms
+    atoms = [database.atoms[i] for i in neighbours]
+
+    return atoms
