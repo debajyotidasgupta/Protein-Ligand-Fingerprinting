@@ -15,6 +15,9 @@ class Atom:
     def get_atom_name(self):
         return self.atom_name
 
+    def get_residue_name(self):
+        return self.residue_name
+
     def get_coordinates(self):
         return np.array([self.x, self.y, self.z])
 

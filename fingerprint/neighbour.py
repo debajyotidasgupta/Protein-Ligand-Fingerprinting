@@ -2,6 +2,7 @@ from .base import *
 from .utils import *
 from .parser import *
 from tqdm import tqdm
+import math
 
 
 class NeighbourFingerprint(BaseFingerprint):
@@ -53,7 +54,8 @@ class NeighbourFingerprint(BaseFingerprint):
                 fingerprints[pos][index] += 1
 
         fingerprints += 1.
-        return fingerprints / np.sum(fingerprints, axis=0, keepdims=True)
+        # return fingerprints / np.sum(fingerprints, axis=0, keepdims=True)
+        return fingerprints / math.pow(distance, 3)
 
     def save_fingerprint(self, file_path):
-        np.savetxt(file_path, self.fingerprint)
+        np.savetxt(file_path, self.fingerprint, fmt='%1.8f')
