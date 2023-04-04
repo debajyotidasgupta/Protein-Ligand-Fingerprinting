@@ -3,10 +3,61 @@ from .alphabets import get_alphabet, FULL_ALPHABETS
 from .parser import Atom, Protein
 from scipy.spatial import cKDTree
 
+import os
+import requests
 import numpy as np
 import pandas as pd
 from collections.abc import Sequence
-from collections import OrderedDict
+
+
+def load_smiles(smiles_path=None):
+    if os.path.exists(smiles_path):
+        with open(smiles_path, "r") as f:
+            smiles = f.read().strip()
+        print(f"Found SMILES at {smiles_path}")
+        return smiles
+    else:
+        raise FileNotFoundError(
+            f"SMILES file not found at {smiles_path}.")
+
+
+def download_smiles(pdb_id, download_path=None):
+    if os.path.exists(os.path.join(download_path, f"{pdb_id}.smiles")):
+        print(f"Found SMILES for {pdb_id}")
+        return
+
+    url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{pdb_id}/property/IsomericSMILES/TXT"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        smiles = response.text.strip()
+        print(f"Found SMILES for {pdb_id}")
+        # Save the SMILES
+        if download_path is None:
+            download_path = os.getcwd()
+        with open(os.path.join(download_path, f"{pdb_id}.smiles"), "w") as f:
+            f.write(smiles)
+    else:
+        raise ValueError(f"Could not find SMILES for PDB ID: {pdb_id}")
+
+
+def download_pdb(pdb_id, download_path=None):
+    if os.path.exists(os.path.join(download_path, f"{pdb_id}.pdb")):
+        print(f"Found PDB file for {pdb_id} as {pdb_id}.pdb")
+        return
+
+    url = f"https://files.rcsb.org/download/{pdb_id.upper()}.pdb"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        pdb_content = response.text
+        if download_path is None:
+            download_path = os.getcwd()
+        with open(os.path.join(download_path, f"{pdb_id}.pdb"), "w") as f:
+            f.write(pdb_content)
+        print(f"Downloaded PDB file for {pdb_id} as {pdb_id}.pdb")
+    else:
+        raise ValueError(f"Could not download PDB file for PDB ID: {pdb_id}")
 
 
 def check_list(array: Any) -> bool:
