@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# pdb and fingerprint files
+data/pdb_files
+output/fingerprints
