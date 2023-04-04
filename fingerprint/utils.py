@@ -18,7 +18,7 @@ def load_smiles(smiles_path=None):
         return smiles
     else:
         raise FileNotFoundError(
-            f"SMILES file not found for {pdb_id} at {smiles_path}.")
+            f"SMILES file not found at {smiles_path}.")
 
 
 def download_smiles(pdb_id, download_path=None):
