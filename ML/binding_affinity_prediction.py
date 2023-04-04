@@ -49,8 +49,11 @@ pdb_ids = []
 features = []
 labels = []
 
-
+i = 0
 for _, row in dataset.iterrows():
+    if i>=10:
+        break
+    i+=1
     pdb_id = row['pdb_id']
     label = row['label']
 
@@ -70,7 +73,7 @@ for _, row in dataset.iterrows():
     labels.append(label)
 
 pdb_ids = np.array(pdb_ids)
-features = np.stack(features)
+# features = np.stack(features)
 labels = np.array(labels)
 
 dataset = dc.data.NumpyDataset(X=features, y=labels, ids=pdb_ids)
