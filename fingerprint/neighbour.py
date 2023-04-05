@@ -6,7 +6,7 @@ import math
 
 
 class NeighbourFingerprint(BaseFingerprint):
-    def __init__(self, pdb: ProteinLigandComplex, *args, **kwargs):
+    def __init__(self, pdb: ProteinLigandComplex, distance=7.0, *args, **kwargs):
         """The NeighbourFingerprint class is used to generate a fingerprint of the protein-ligand complex.
         Args:
             pdb (ProteinLigandComplex): The protein-ligand complex.
@@ -25,7 +25,7 @@ class NeighbourFingerprint(BaseFingerprint):
             'R': 4,
         }
 
-        self.fingerprint = self._get_fingerprint()
+        self.fingerprint = self._get_fingerprint(distance)
 
     def _get_fingerprint(self, distance=7.0):
         # Get the protein
