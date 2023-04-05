@@ -102,20 +102,26 @@ for _, row in dataset.iterrows():
     labels.append(label)
 
 pdb_ids = np.array(pdb_ids)
+
+# pad to maximum length if all fingerprints are not of same length
 max_shape = tuple(max(i) for i in zip(*[a.shape for a in features]))
 padded_arrays = [np.pad(a, [(0, max_shape[0] - a.shape[0]), (0, max_shape[1] - a.shape[1])], 'constant') for a in features]
 padded_arrays = [a.reshape(a.shape[0]*a.shape[1]) for a in padded_arrays]
 features = np.stack(padded_arrays)
 labels = np.array(labels)
 
+# create dataset for prediction of binding affinity
 dataset = dc.data.NumpyDataset(X=features, y=labels, ids=pdb_ids)
 train_dataset, test_dataset = dc.splits.RandomSplitter().train_test_split(dataset, seed=random_seed)
 
+# define the model
 sk_model = RandomForestRegressor(n_estimators=35, max_features="sqrt")
 sk_model.random_state = random_seed
 model = dc.models.SklearnModel(sk_model)
+# train
 model.fit(train_dataset)
 
+# use R^2 score as metric for comparision
 metric = dc.metrics.Metric(dc.metrics.pearson_r2_score)
 
 train_comparision = list(zip(model.predict(train_dataset), train_dataset.y))

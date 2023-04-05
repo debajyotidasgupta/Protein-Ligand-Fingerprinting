@@ -244,6 +244,17 @@ def pdb_seq(pdb: str, pdb_path: str) -> str:
 
 
 def encode(fingerprints, model_path):
+    """
+    Given a neighbourhood fingerprint as numpy array
+    or a list of neighbourhood fingerprints
+    and the path to AutoencoderTransformer model
+    return a fixed length fingerprint for the protein-ligand complex
+    Args:
+        fingerprints: single numpy array(fingerprint) or a list of numpy arrays(fingerprints)
+        model_path: path to AutoencoderTransformer saved model
+    Returns:
+        outputs: a fixed length numpy array/arrays representing a constant length fingerprint
+    """
     model = torch.load(model_path)
     reduce_dim = False
 

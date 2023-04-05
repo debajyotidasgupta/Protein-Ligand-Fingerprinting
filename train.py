@@ -21,8 +21,13 @@ max_pdbs = 100
 random_seed = 42
 
 def generate_neighbour_fingerprints():
+    """
+    generate the intermediate fingerprints for max_pdbs pdb ids
+    based on neighbourhood fingerprinting
+    """
     dataset_file = os.path.join(data_dir, "pdbbind_core_df.csv.gz")
 
+    # download the pdbbind dataset
     if not os.path.exists(dataset_file):
         print("File does not exist. Downloading file...")
         download_url("https://s3-us-west-1.amazonaws.com/deepchem.io/datasets/pdbbind_core_df.csv.gz", dest_dir=data_dir)
@@ -37,6 +42,7 @@ def generate_neighbour_fingerprints():
 
     pdb_ids = dataset['pdb_id']
 
+    # download the pdb files for pdb ids present in pdbbind dataset if not already present 
     for pdb_id in pdb_ids:
         pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
         if os.path.exists(pdb_file):
@@ -57,6 +63,7 @@ def generate_neighbour_fingerprints():
         pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
         feature_output_file = os.path.join(intermediate_dir, f"{pdb_id}.txt")
 
+        # if the intermediate neighbourhood fingerprint already exists continue
         if os.path.exists(feature_output_file):
             continue
         
@@ -71,18 +78,26 @@ def generate_neighbour_fingerprints():
             fingerprint = NeighbourFingerprint(protein_ligand_complex)
             fingerprint_array = fingerprint.get_fingerprint()
 
+            # save the intermediate neighbourhood fiingerprint
             np.savetxt(feature_output_file, fingerprint_array, fmt='%1.8f')
 
 def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256, epochs=10):
+    """
+    main code to train the AutoencoderTransformer
+    """
     model = AutoencoderTransformer(input_dim=input_dim, hidden_dim=hidden_dim, 
                                    num_layers=num_layers, num_heads=num_heads, output_dim=output_dim)
+    # train using mean squared error loss
     criterion = nn.MSELoss()
+    # use Adam optimizer
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     fingerprints = []
+    # load the intermediate neighbourhood fingerprints
     for file in os.listdir(intermediate_dir):
         fingerprints.append(np.loadtxt(os.path.join(intermediate_dir, file)))
     
+    # perform a train test split in 80:20 ratio
     fingerprints_train, fingerprints_test, _, _ = train_test_split(fingerprints, [0 for x in fingerprints], test_size=0.2, random_state=random_seed)
 
     train_loader = [torch.from_numpy(x) for x in fingerprints_train]
@@ -98,6 +113,7 @@ def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256,
     for epoch in range(epochs):
         running_loss = 0.0
         model.train()
+        # TRAIN
         for i, data in enumerate(train_loader, 0):
             inputs = data
             optimizer.zero_grad()
@@ -113,6 +129,7 @@ def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256,
                 running_loss = 0.0
         
         model.eval()
+        # EVALUATE
         for i, data in enumerate(test_loader, 0):
             inputs = data
             _, decoded = model(inputs)
@@ -120,6 +137,7 @@ def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256,
             if loss < min_loss:
                 min_loss = loss
                 print(f"min val loss = {min_loss}")
+                # save the best (minimum validation loss) model so far
                 torch.save(model, os.path.join(models_dir,f"AutoencoderTransformer.pt"))
 
 

@@ -12,14 +12,15 @@ from fingerprint import *
 
 config = dotenv_values(".env")
 data_dir = config['DATA_ROOT']
-intermediate_dir = config['INTERMEDIATE_DIR']
+fingerprints_dir = config['FINGERPRINTS_DIR']
 model_path = config['MODEL_PATH']
 random_seed = int(config['RANDOM_SEED'])
+output_dir = config['OUTPUT_DATA']
 
 if not os.path.isdir(data_dir):
     os.mkdir(data_dir)
-if not os.path.isdir(intermediate_dir):
-    os.mkdir(intermediate_dir)
+if not os.path.isdir(fingerprints_dir):
+    os.mkdir(fingerprints_dir)
 
 dataset_file = os.path.join(data_dir, "pdbbind_core_df.csv.gz")
 
@@ -53,10 +54,12 @@ for _, row in dataset.iterrows():
     pdb_id = row['pdb_id']
 
     pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
-    feature_output_file = os.path.join(intermediate_dir, f"{pdb_id}.txt")
+    feature_output_file = os.path.join(fingerprints_dir, f"{pdb_id}.txt")
 
     if os.path.exists(feature_output_file):
         fingerprint_array = np.loadtxt(feature_output_file)
+        pdb_ids.append(pdb_id)
+        features.append(fingerprint_array)
     
     else:
         continue
@@ -74,13 +77,17 @@ for _, row in dataset.iterrows():
 
         np.savetxt(feature_output_file, fingerprint_array, fmt='%1.8f')
 
-    pdb_ids.append(pdb_id)
-    features.append(fingerprint_array)
+    # pdb_ids.append(pdb_id)
+    # features.append(fingerprint_array)
 
-scores = []
+cosine_scores = []
+euclidean_scores = []
 
 def cosine_similarity(feature1, feature2):
     return np.dot(feature1,feature2)/(norm(feature1)*norm(feature2))
+
+def euclidean_distance(feature1, feature2):
+    return norm(feature1 - feature2)
 
 for i in range(0, len(features)):
 
@@ -91,28 +98,37 @@ for i in range(0, len(features)):
         print(i, end=' ')
     
     for j in range(i+1, len(features)):
-        scores.append(cosine_similarity(features[i], features[j]))
+        cosine_scores.append(cosine_similarity(features[i], features[j]))
+        euclidean_scores.append(euclidean_distance(features[i], features[j]))
     
 print("Done!")
-print("# of scores : ", len(scores))
+print("# of scores : ", len(cosine_scores))
+
+with open(os.path.join(output_dir, 'euclidean.txt'), 'w') as f:
+    f.write(str(euclidean_scores))
+
+with open(os.path.join(output_dir, 'cosine.txt'), 'w') as f:
+    f.write(str(cosine_scores))
 
 mybins = [ x * 0.01 for x in range(101)]
 
-fig = plt.figure(figsize=(8,4), dpi=300)
+# fig = plt.figure(figsize=(8,4), dpi=300)
 
-plt.subplot(1, 2, 1)
-plt.title("Distribution")
-plt.hist(scores, bins=mybins)
+# plt.subplot(1, 2, 1)
+# plt.title("Distribution")
+# plt.hist(cosine_scores, bins=mybins)
 
-plt.subplot(1, 2, 2)
-plt.title("Cumulative Distribution")
-plt.hist(scores, bins=mybins, density=True, cumulative=1)
-plt.plot([0,1],[0.95,0.95])
+# plt.subplot(1, 2, 2)
+# plt.title("Cumulative Distribution")
+# plt.hist(cosine_scores, bins=mybins, density=True, cumulative=1)
+# plt.plot([0,1],[0.95,0.95])
+
+# plt.show()
 
 for i in range(21) :
     thresh = i / 20
-    num_similar_pairs = len([x for x in scores if x >= thresh]) 
-    prob = num_similar_pairs / len(scores) * 100
+    num_similar_pairs = len([x for x in cosine_scores if x >= thresh]) 
+    prob = num_similar_pairs / len(cosine_scores) * 100
     print("%.3f %8d (%8.4f %%)" % (thresh, num_similar_pairs, round(prob,4)))
 
-print("Average:", sum(scores)/len(scores))
+print("Average:", sum(cosine_scores)/len(cosine_scores))

@@ -2,6 +2,13 @@ import torch
 import torch.nn as nn
 
 class AutoencoderTransformer(nn.Module):
+    """
+    A sequence to sequence self prediction transformer
+    A sequence is fed as input to the transformer encoder
+    The transformer decoder tries to obtain the original input by decoding
+    The average of all encoder states is fed to a linear layer followed by sigmoid
+    to obtain a fixed length embedding for the input sequence
+    """
     def __init__(self, input_dim, hidden_dim, num_layers, num_heads, output_dim):
         super().__init__()
         self.input_dim = input_dim
