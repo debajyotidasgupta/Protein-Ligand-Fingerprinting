@@ -211,7 +211,7 @@ _In order to setup a local copy of the project, you can follow the one of the 2 
    ```sh
    source venv/bin/activate
    ```
-6. `iinstall` required dependencies with the following command
+6. `install` required dependencies with the following command
    ```go
    pip install -r requirements.txt
    ```
