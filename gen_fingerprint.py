@@ -1,6 +1,7 @@
 import os
 import sys
 import json
+import gdown
 import numpy as np
 from dotenv import dotenv_values
 from fingerprint import *
@@ -91,7 +92,7 @@ if __name__ == '__main__':
     protein_ligand_complex.load_pdb(os.path.join(PDB_DATA, f'{pdb}.pdb'))
 
     # Print the protein fingerprint
-    fingerprint = NeighbourFingerprint(protein_ligand_complex)
+    fingerprint = NeighbourFingerprint(protein_ligand_complex, distance=4)
     fingerprint = fingerprint.get_fingerprint()
     print(f"\nFingerprint shape = {fingerprint.shape}")
     print(f'Fingerprint:\n{fingerprint}')
@@ -99,7 +100,7 @@ if __name__ == '__main__':
     print(
         f"\n═════▷ Saving fingerprint to {os.path.join(OUTPUT_DATA, pdb, f'{pdb}_neighbour.txt')} ◁═════")
     np.savetxt(os.path.join(OUTPUT_DATA, pdb,
-               f'{pdb}_neighbour.txt'), fingerprint)
+               f'{pdb}_neighbour.txt'), fingerprint, fmt='%d')
 
     print(f"\n────────────────────────────────────────────────────\n")
 
@@ -119,15 +120,27 @@ if __name__ == '__main__':
     \n
     """)
 
-    # encode the fingerprint using transformers model to get a constant length feature vector
-    fingerprint = encode(fingerprint, MODEL_PATH)
-    print(f"Fingerprint shape = {fingerprint.shape}")
-    print(f"Fingerprint:\n{np.array2string(fingerprint, threshold=100)}")
+    try:
+        url = config['MODEL_URL']
+        output = config['MODEL_PATH']
 
-    print(
-        f"\n═════▷ Saving fingerprint to {os.path.join(OUTPUT_DATA, pdb, f'{pdb}_neighbour_transformer.txt')} ◁═════")
-    np.savetxt(os.path.join(OUTPUT_DATA, pdb,
-                            f'{pdb}_neighbour_transformer.txt'), fingerprint)
+        if os.path.exists(output):
+            print(f"Model already downloaded to {output}")
+        else:
+            gdown.download(url, output, quiet=False)
+
+        # encode the fingerprint using transformers model to get a constant length feature vector
+        fingerprint = encode(fingerprint, MODEL_PATH)
+        print(f"Fingerprint shape = {fingerprint.shape}")
+        print(f"Fingerprint:\n{np.array2string(fingerprint, threshold=100)}")
+
+        print(
+            f"\n═════▷ Saving fingerprint to {os.path.join(OUTPUT_DATA, pdb, f'{pdb}_neighbour_transformer.txt')} ◁═════")
+        np.savetxt(os.path.join(OUTPUT_DATA, pdb,
+                                f'{pdb}_neighbour_transformer.txt'), fingerprint)
+    except Exception as e:
+        print(
+            f"═════▷ Skipping transformer encoding due to error: {e}\n  ◁═════")
 
     print(f"\n────────────────────────────────────────────────────\n")
 
