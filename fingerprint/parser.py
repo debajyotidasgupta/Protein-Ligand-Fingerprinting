@@ -126,7 +126,7 @@ class ProteinLigandSideChainComplex:
                 if line.startswith("ATOM"):
                     is_atom = True
 
-                if is_atom and atom_name.strip()[0] not in ['N', 'C', 'O', 'CA']:
+                if is_atom and atom_name.strip() not in ['N', 'C', 'O', 'CA']:
                     if chain_id not in side_chain_atoms_dict:
                         side_chain_atoms_dict[chain_id] = {}
                     if residue_id not in side_chain_atoms_dict[chain_id]:
