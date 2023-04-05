@@ -1,6 +1,7 @@
 from typing import List, Dict, Union, Any
 from .alphabets import get_alphabet, FULL_ALPHABETS
 from .parser import Atom, Protein
+from .transformer import AutoencoderTransformer
 from scipy.spatial import cKDTree
 
 import os
@@ -8,7 +9,8 @@ import requests
 import numpy as np
 import pandas as pd
 from collections.abc import Sequence
-
+import torch
+import torch.nn as nn
 
 def load_smiles(smiles_path=None):
     if os.path.exists(smiles_path):
@@ -152,3 +154,32 @@ def protein2seq(protein: Protein) -> str:
         if atom.get_atom_name() == "CA":
             sequence += IUPAC_3_to_1[atom.get_residue_name()]
     return sequence
+
+
+def encode(fingerprints, model_path = 'output/models/AutoencoderTransformer_4.pt'):
+    model = torch.load(model_path)
+    reduce_dim = False
+
+    if isinstance(fingerprints,np.ndarray) and fingerprints.ndim==2:
+        fingerprints = [fingerprints]
+        reduce_dim = True
+
+    data_loader = [torch.from_numpy(x) for x in fingerprints]
+    data_loader = [torch.unsqueeze(x, 0) for x in data_loader]
+    data_loader = [x.to(torch.float) for x in data_loader]
+
+    model.eval()
+
+    outputs = []
+
+    for i, data in enumerate(data_loader, 0):
+        input = data
+        output, _ = model(input)
+        outputs.append(torch.squeeze(output).detach().numpy())
+    
+    if reduce_dim:
+        outputs = outputs[0]
+    
+    return outputs
+
+

@@ -13,8 +13,9 @@ from fingerprint import *
 random_seed = 42
 
 data_dir = '../data'
-intermediate_dir = '../output/fingerprints'
+intermediate_dir = '../output/intermediate'
 output_dir = '../output'
+model_path = '../output/models/AutoencoderTransformer_4.pt'
 
 if not os.path.isdir(data_dir):
     os.mkdir(data_dir)
@@ -72,8 +73,10 @@ for _, row in dataset.iterrows():
         # obtain the protein fingerprint
         fingerprint = NeighbourFingerprint(protein_ligand_complex)
 
-        fingerprint_array = fingerprint.get_fingerprint()
-        fingerprint.save_fingerprint(feature_output_file)
+        # obtain fixed length fingerprint (256 here)
+        fingerprint = encode(fingerprint, model_path=model_path)
+
+        np.savetxt(feature_output_file, fingerprint, fmt='%1.8f')
 
     pdb_ids.append(pdb_id)
     features.append(fingerprint_array)
@@ -99,8 +102,8 @@ metric = dc.metrics.Metric(dc.metrics.pearson_r2_score)
 train_comparision = list(zip(model.predict(train_dataset), train_dataset.y))
 test_comparision = list(zip(model.predict(test_dataset), test_dataset.y))
 
-open(os.path.join(output_dir, 'train_comparision'), 'w').write(str(train_comparision))
-open(os.path.join(output_dir, 'test_comparision'), 'w').write(str(test_comparision))
+# open(os.path.join(output_dir, 'train_comparision'), 'w').write(str(train_comparision))
+# open(os.path.join(output_dir, 'test_comparision'), 'w').write(str(test_comparision))
 
 evaluator = Evaluator(model, train_dataset, [])
 train_r2score = evaluator.compute_model_performance([metric])

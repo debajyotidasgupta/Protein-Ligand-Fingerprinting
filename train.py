@@ -44,13 +44,14 @@ def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256,
         torch.save(model, os.path.join(models_dir,f"AutoencoderTransformer_{epoch}.pt"))
 
 if __name__ == "__main__":
+    print("here")
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input_dim')
-    parser.add_argument('-h', '--hidden_dim')
-    parser.add_argument('-l', '--num_layers')
-    parser.add_argument('-nh', '--num_heads')
-    parser.add_argument('-o', '--output_dim')
-    parser.add_argument('-e', '--epochs')
+    parser.add_argument('-i', '--input_dim', default=5)
+    parser.add_argument('-hi', '--hidden_dim', default=32)
+    parser.add_argument('-l', '--num_layers', default=2)
+    parser.add_argument('-nh', '--num_heads', default=5)
+    parser.add_argument('-o', '--output_dim', default=256)
+    parser.add_argument('-e', '--epochs', default=5)
     args = parser.parse_args()
 
-    
+    train(args.input_dim, args.hidden_dim, args.num_layers, args.num_heads, args.output_dim, args.epochs)

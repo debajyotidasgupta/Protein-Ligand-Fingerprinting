@@ -24,11 +24,16 @@ if __name__ == '__main__':
 
     # # Print the protein fingerprint
     fingerprint = NeighbourFingerprint(protein_ligand_complex)
-    print(fingerprint.get_fingerprint())
+
+    # encode the fingerprint using transformers model to get a constant length feature vector
+    fingerprint = encode(fingerprint.get_fingerprint())
+    print(f"fingerprint shape = {fingerprint.shape}")
+    print("fingerprint:")
+    print(fingerprint)
 
     # Save the fingerprint
-    fingerprint.save_fingerprint(
-        os.path.join(OUTPUT_DATA, f'{pdb}.txt'))
+    # fingerprint.save_fingerprint(
+    #     os.path.join(OUTPUT_DATA, f'{pdb}.txt'))
 
     # Print the protein
     seq = protein2seq(protein_ligand_complex.protein)

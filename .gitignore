@@ -132,3 +132,4 @@ dmypy.json
 data/pdb_files
 output/fingerprints
 output/models
+data/pdbbind_core_df.csv.gz
