@@ -74,9 +74,9 @@ for _, row in dataset.iterrows():
         fingerprint = NeighbourFingerprint(protein_ligand_complex)
 
         # obtain fixed length fingerprint (256 here)
-        fingerprint = encode(fingerprint, model_path=model_path)
+        fingerprint_array = encode(fingerprint.get_fingerprint(), model_path=model_path)
 
-        np.savetxt(feature_output_file, fingerprint, fmt='%1.8f')
+        np.savetxt(feature_output_file, fingerprint_array, fmt='%1.8f')
 
     pdb_ids.append(pdb_id)
     features.append(fingerprint_array)

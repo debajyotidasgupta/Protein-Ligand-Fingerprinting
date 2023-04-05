@@ -131,5 +131,9 @@ dmypy.json
 # pdb, models and fingerprint files
 data/pdb_files
 output/fingerprints
-output/models
+output/intermediate
+output/models/AutoencoderTransformer_0.pt
+output/models/AutoencoderTransformer_1.pt
+output/models/AutoencoderTransformer_2.pt
+output/models/AutoencoderTransformer_3.pt
 data/pdbbind_core_df.csv.gz
