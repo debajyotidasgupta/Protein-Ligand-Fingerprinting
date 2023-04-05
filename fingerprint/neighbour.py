@@ -56,7 +56,6 @@ class NeighbourFingerprint(BaseFingerprint):
         return fingerprints
 
     def get_fingerprint(self):
-        self.fingerprint = self._get_fingerprint()
         return self.fingerprint
 
     def save_fingerprint(self, file_path):
