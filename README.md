@@ -1,8 +1,9 @@
 # Protein-Ligand-Fingerprinting
 
 ```python
-python3 main.py --pdb ./data/2xni.pdb --output output/2xni.txt
+python3 gen_fingerprint.py 2xni.pdb
 ```
+
 # Protein-Ligand-Fingerprinting
 
 <div id="top"></div>
@@ -33,11 +34,11 @@ python3 main.py --pdb ./data/2xni.pdb --output output/2xni.txt
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/debajyotidasgupta/raft-consensus">
+  <a href="https://github.com/debajyotidasgupta/Protein-Ligand-Fingerprinting">
     <img src="./images/logo.png" alt="Logo">
   </a>
 
-  <h3 align="center">Protein Ligand Fingerprinting</h3>
+  <h3 align="center">Deep-ProLiPrint: Protein Ligand Fingerprinting</h3>
 
   <p align="center">
     Methods to obtain fingerprint for a protein-ligand complex.
@@ -106,6 +107,13 @@ Following mentioned are the major frameworks/libraries used to bootstrap this pr
   - [PyTorch](https://pytorch.org/) - _Mainly required for the Transformer model_
   - [scikit-learn](https://scikit-learn.org/stable/) - _Used for implementing RandomForestRegressor to predict binding affinity of protein-ligand complexes using our fingerprinting method_
   - [DeepChem](https://deepchem.io/) - _Used to download pdbbind data for binding affinity of complexes_
+  - [Biopython](https://biopython.org/) - _Used to parse PDB files_
+  - [RDKit](https://www.rdkit.org/) - _Used to generate SMILES for ligands_
+  - [Pandas](https://pandas.pydata.org/) - _Used to store the data in a dataframe_
+  - [Matplotlib](https://matplotlib.org/) - _Used to plot the graphs_
+  - [Seaborn](https://seaborn.pydata.org/) - _Used to plot the graphs_
+  - [tqdm](https://tqdm.github.io/) - _Used to display progress bars_
+  - [SciPy](https://www.scipy.org/) - _Used to calculate the distance between atoms_
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -155,7 +163,7 @@ Following are the details of the file structure and their functionalities that a
   - `ProteinLigandComplex`- Class to store a protein-ligand complex as a combination of a Protein object and a Ligand object
 - **fingerprint/base.py** - _This file contains class implenetation of BaseFingerprint which serves as a base class for the original NeighbourFingerprint class_
 - **fingerprint/neighbour.py** - _This file contains the class implementation for our Neighbourhood based Fingerprinting scheme_
-  - `NeighbourFingerprint` - derived from BaseFingerprint, this class obtains a fingerprint of length N*5 where N is the no of ligand atoms in the complex and dimension 5 comes for count of each N, CA, C, O and R, each entry denotes the count of the atom/group in certain radius of the ligand atom
+  - `NeighbourFingerprint` - derived from BaseFingerprint, this class obtains a fingerprint of length N\*5 where N is the no of ligand atoms in the complex and dimension 5 comes for count of each N, CA, C, O and R, each entry denotes the count of the atom/group in certain radius of the ligand atom
 - **fingerprint/alphabets.py** - _This file contains various AAR recoding schemes used in Kmer based fingerprinting_
 - **fingerprint/kmer.py** - _This file contains various class implementations for the K-mer based fingerprinting scheme_
   - `KmerBasis` - Class to store kmer basis set and perform basis set transforms, store kmer basis set and transform new vectors into fitted basis
@@ -206,6 +214,8 @@ _In order to setup a local copy of the project, you can follow the one of the 2 
 4. Create a `virtual environment` to install the required dependencies
    ```sh
    virtualenv venv
+   or
+   python3 -m venv venv
    ```
 5. Activate the `virtual environment` venv
    ```sh
@@ -217,7 +227,6 @@ _In order to setup a local copy of the project, you can follow the one of the 2 
    ```
 
 <p align="right">(<a href="#top">back to top</a>)</p>
-
 
 <!-- USAGE EXAMPLES -->
 
@@ -231,11 +240,20 @@ _To generate fingerprint for a particular PDB id, do the following steps\:_
 
 1.  Open terminal from the main project directory
 2.  Run the gen_fingerprint.py file with only the PDB id or PDB filename as argument
+
     ```sh
     python gen_fingerprint.py <pdbid>
     ```
-3.  An output will be displayed on the screen comprising the fingerprint obatined using all the 4 techniques mentioned earlier
 
+    Example
+
+    ```sh
+    python gen_fingerprint.py 2XNI
+    or
+    python gen_fingerprint.py 2XNI.pdb
+    ```
+
+3.  An output will be displayed on the screen comprising the fingerprint obatined using all the 4 techniques mentioned earlier
 
 ### Running an ML model to predict binding affinity of complexes
 
@@ -252,7 +270,7 @@ _To train and test a RandomForestRegressor to predict binding affinity of comple
 
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the Apache License 2.0. See `LICENSE.txt` for more information.
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -273,26 +291,33 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 
 List of resources we found helpful and we would like to give them some credits.
 
-- [The Raft Consensus Algorithm](https://raft.github.io/)
-- [In Search of an Understandable Consensus Algorithm](https://raft.github.io/raft.pdf)
-- [You Must Build A Raft](https://www.youtube.com/watch?v=Hm_m4MIXn9Q)
-- [Practical Distributed Consensus using HashiCorp/raft](https://www.youtube.com/watch?v=EGRmmxVFOfE)
-- [Lecture Notes CS60002](https://cse.iitkgp.ac.in/~sandipc/courses/cs60002/cs60002.html)
+- [CS61060 - Computational Biophysics: Algorithms to Applications](https://cse.iitkgp.ac.in/~pralay/teaching/2019S/CompBio/LectureSlides-1-4.pdf)
+- [ProLIF: a library to encode molecular interactions as fingerprints](https://link.springer.com/article/10.1186/s13321-021-00548-6)
+- [Protein-Ligand Interaction Fingerprints](https://pubs.acs.org/doi/10.1021/acs.jcim.9b00510)
+- [Snekmer: a scalable pipeline for protein sequence fingerprinting based on amino acid recoding](https://academic.oup.com/bioinformaticsadvances/article/3/1/vbad005/7024077)
+- [PDBBind dataset - 2019](http://www.pdbbind.org.cn/)
+- [PDB](https://www.rcsb.org/)
+- [SMILES](https://www.daylight.com/dayhtml/doc/theory/theory.smiles.html)
+- [KmerVec](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6300003/)
+- [Autoencoder](https://www.tensorflow.org/tutorials/generative/autoencoder)
+- [Transformer](https://www.tensorflow.org/tutorials/text/transformer)
+- [Pytorch](https://pytorch.org/)
+- [RDKit](https://www.rdkit.org/)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 
-[contributors-shield]: https://img.shields.io/github/contributors/debajyotidasgupta/raft-consensus?style=for-the-badge
-[contributors-url]: https://github.com/debajyotidasgupta/raft-consensus/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/debajyotidasgupta/raft-consensus?style=for-the-badge
-[forks-url]: https://github.com/debajyotidasgupta/raft-consensus/network/members
-[stars-shield]: https://img.shields.io/github/stars/debajyotidasgupta/raft-consensus?style=for-the-badge
-[stars-url]: https://github.com/debajyotidasgupta/raft-consensus/stargazers
-[issues-shield]: https://img.shields.io/github/issues/debajyotidasgupta/raft-consensus?style=for-the-badge
-[issues-url]: https://github.com/debajyotidasgupta/raft-consensus/issues
-[license-shield]: https://img.shields.io/github/license/debajyotidasgupta/raft-consensus?style=for-the-badge
-[license-url]: https://github.com/debajyotidasgupta/raft-consensus/blob/main/LICENSE
+[contributors-shield]: https://img.shields.io/github/contributors/debajyotidasgupta/Protein-Ligand-Fingerprinting?style=for-the-badge
+[contributors-url]: https://github.com/debajyotidasgupta/Protein-Ligand-Fingerprinting/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/debajyotidasgupta/Protein-Ligand-Fingerprinting?style=for-the-badge
+[forks-url]: https://github.com/debajyotidasgupta/Protein-Ligand-Fingerprinting/network/members
+[stars-shield]: https://img.shields.io/github/stars/debajyotidasgupta/Protein-Ligand-Fingerprinting?style=for-the-badge
+[stars-url]: https://github.com/debajyotidasgupta/Protein-Ligand-Fingerprinting/stargazers
+[issues-shield]: https://img.shields.io/github/issues/debajyotidasgupta/Protein-Ligand-Fingerprinting?style=for-the-badge
+[issues-url]: https://github.com/debajyotidasgupta/Protein-Ligand-Fingerprinting/issues
+[license-shield]: https://img.shields.io/github/license/debajyotidasgupta/Protein-Ligand-Fingerprinting?style=for-the-badge
+[license-url]: https://github.com/debajyotidasgupta/Protein-Ligand-Fingerprinting/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/in/debajyoti-dasgupta/
