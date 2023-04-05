@@ -73,9 +73,12 @@ if __name__ == '__main__':
     │                                              │
     │  For each atom in the ligand, find the       │
     │  protein atoms within a cutoff distance      │
-    │  The fingerprint is a normalized vector      │
-    │  of the number of atoms in  each of the      │
-    │  20 amino acid types.                        │
+    │  The fingerprint is a frequency vector       │
+    │  of the {N, C, CA, R, O} atoms in the        │
+    │  neighbourhood of the ligand atoms. R        │
+    │  represents the atoms not part of the        │
+    │  backbone and is represented by the          │
+    │  centroid of the side chain.                 │
     │                                              │
     └──────────────────────────────────────────────┘
     \n
@@ -169,9 +172,50 @@ if __name__ == '__main__':
 
     print(f"\n────────────────────────────────────────────────────\n")
 
-    # # Print the ligand Fingerprint
-    # fp = get_ligand_fingerprint(pdb=pdb,
-    #                             smiles_path=SMILES_DATA,
-    #                             pdb_path=PDB_DATA)
+    print(f"""
+    ┌──────────────────────────────────────────────┐
+    │                                              │
+    │       Ligand MACCS KEY Fingerprint           │
+    │                                              │
+    ┠──────────────────────────────────────────────┨
+    │                                              │
+    │  The MACCS keys are a set of 166 binary      │
+    │  molecular descriptors that are used to      │
+    │  characterize the chemical structure of      │
+    │  a molecule.                                 │
+    │                                              │
+    │  The fingerprint is a vector of the number   │
+    │  of times each of the MACCS keys appear in   │
+    │  the ligand.                                 │
+    │                                              │
+    └──────────────────────────────────────────────┘
+    \n
+    """)
 
-    # print(fp.ToBitString())
+    # Print the ligand Fingerprint
+    fp = get_ligand_fingerprint(pdb=pdb,
+                                smiles_path=SMILES_DATA,
+                                pdb_path=PDB_DATA)
+    fingerprint = fp.ToBitString()
+    print(f"Fingerprint length = {len(fingerprint)}")
+    print(f'Fingerprint:\n{fingerprint}')
+
+    print(
+        f"\n═════▷ Saving fingerprint to {os.path.join(OUTPUT_DATA, pdb, f'{pdb}_maccs.txt')} ◁═════")
+    with open(os.path.join(OUTPUT_DATA, pdb, f'{pdb}_maccs.txt'), 'w') as f:
+        f.write(fingerprint)
+
+    print(f"\n────────────────────────────────────────────────────\n")
+
+    print(f"""
+    ✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅✅
+    🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳🥳
+
+    ┌──────────────────────────────────────────────┐
+    │                                              │
+    │        PROGRAM EXECUTION COMPLETED           │
+    │               SUCCESSFULLY!                  │
+    │                                              │
+    └──────────────────────────────────────────────┘
+    \n
+    """)

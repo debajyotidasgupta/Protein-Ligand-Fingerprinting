@@ -55,5 +55,8 @@ class NeighbourFingerprint(BaseFingerprint):
 
         return fingerprints
 
+    def get_fingerprint(self):
+        return self.fingerprint
+
     def save_fingerprint(self, file_path):
         np.savetxt(file_path, self.fingerprint, fmt='%1.8f')
