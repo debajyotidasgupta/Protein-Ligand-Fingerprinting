@@ -1,4 +1,5 @@
 autopep8==2.0.2
+beautifulsoup4==4.12.1
 certifi==2022.12.7
 charset-normalizer==3.1.0
 cmake==3.26.1
@@ -8,6 +9,7 @@ deepchem==2.7.1
 fasteners==0.18
 filelock==3.10.7
 fonttools==4.39.3
+gdown==4.7.1
 GridDataFormats==1.0.1
 gsd==2.8.0
 idna==3.4
@@ -39,13 +41,16 @@ pandas==2.0.0
 Pillow==9.5.0
 pycodestyle==2.10.0
 pyparsing==3.0.9
+PySocks==1.7.1
 python-dateutil==2.8.2
+python-dotenv==1.0.0
 pytz==2023.3
 rdkit==2022.9.5
 requests==2.28.2
 scikit-learn==1.2.2
 scipy==1.8.1
 six==1.16.0
+soupsieve==2.4
 sympy==1.11.1
 threadpoolctl==3.1.0
 tomli==2.0.1
