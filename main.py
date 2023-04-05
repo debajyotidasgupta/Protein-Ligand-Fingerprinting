@@ -2,6 +2,10 @@ import os
 import sys
 from fingerprint import *
 
+# train
+# simple fingerprint
+# fingerprint with transformer encoding
+
 if __name__ == '__main__':
     pdb = sys.argv[1].strip().split('.')[0]
 
