@@ -222,7 +222,7 @@ _In order to setup a local copy of the project, you can follow the one of the 2 
    source venv/bin/activate
    ```
 6. `install` required dependencies with the following command
-   ```go
+   ```sh
    pip install -r requirements.txt
    ```
 
@@ -254,6 +254,15 @@ _To generate fingerprint for a particular PDB id, do the following steps\:_
     ```
 
 3.  An output will be displayed on the screen comprising the fingerprint obatined using all the 4 techniques mentioned earlier
+
+### Outputs
+
+Following four outputs are generated and saved in the mentioned files
+
+1.  **Neighbourhood based fingerprint** - saved in `output/<pdb_id>/<pdb_id>_neighbour.txt`
+2.  **Encoded Neighbourhood based fingerprint** - saved in `output/<pdb_id>/<pdb_id>_neighbour_transformer.txt`
+3.  **Kmer based fingerprint** - saved in `output/<pdb_id>/<pdb_id>_aar_kmer.json`
+4.  **Ligand MAACS Key** - saved in `output/<pdb_id>/<pdb_id>_maacs.txt`
 
 ### Running an ML model to predict binding affinity of complexes
 
