@@ -8,6 +8,18 @@ from .utils import download_smiles_ligand_name, bitwise_or_fingerprint, download
 
 
 def get_ligands(pdb: str) -> list:
+    """ Get ligands from PDB ID.
+
+    - Utilizes the PUG REST API to get ligands from a PDB ID.
+    - Returns a list of ligands.
+    - Also returns the PubMed ID if available.
+
+    Args:
+        pdb (str): PDB ID
+
+    Returns:
+        list: List of ligands
+    """
     URL = f'https://data.rcsb.org/rest/v1/core/entry/{pdb.lower()}'
     response = requests.get(URL)
 
