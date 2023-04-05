@@ -1,8 +1,6 @@
 import os
 import sys
 from dotenv import dotenv_values
-from rdkit import Chem
-from rdkit.Chem import MACCSkeys
 from fingerprint import *
 
 if __name__ == '__main__':
@@ -22,16 +20,17 @@ if __name__ == '__main__':
     # Load the PDB file
     protein_ligand_complex.load_pdb(os.path.join(PDB_DATA, f'{pdb}.pdb'))
 
-    # # Print the protein fingerprint
+    # Print the protein fingerprint
     fingerprint = NeighbourFingerprint(protein_ligand_complex)
 
     # encode the fingerprint using transformers model to get a constant length feature vector
-    fingerprint = encode(fingerprint.get_fingerprint())
-    print(f"fingerprint shape = {fingerprint.shape}")
-    print("fingerprint:")
-    print(fingerprint)
+    # fingerprint = encode(fingerprint.get_fingerprint())
+    # print(f"fingerprint shape = {fingerprint.shape}")
+    # print(f"fingerprint: {fingerprint}")
 
-    # Save the fingerprint
+    print(fingerprint.get_fingerprint())
+
+    # # Save the fingerprint
     # fingerprint.save_fingerprint(
     #     os.path.join(OUTPUT_DATA, f'{pdb}.txt'))
 
@@ -42,15 +41,8 @@ if __name__ == '__main__':
     print(vec.vectorize(seq))
 
     # Print the ligand Fingerprint
-    try:
-        # Download the SMILES file
-        download_smiles(pdb, SMILES_DATA)
+    fp = get_ligand_fingerprint(pdb=pdb,
+                                smiles_path=SMILES_DATA,
+                                pdb_path=PDB_DATA)
 
-        # Load the SMILES file
-        smiles = load_smiles(os.path.join(SMILES_DATA, f'{pdb}.smiles'))
-
-        mol = Chem.MolFromSmiles(smiles)
-    except:
-        mol = Chem.MolFromPDBFile(os.path.join(PDB_DATA, f'{pdb}.pdb'))
-    fp = MACCSkeys.GenMACCSKeys(mol)
     print(fp.ToBitString())

@@ -12,6 +12,47 @@ from collections.abc import Sequence
 import torch
 import torch.nn as nn
 
+from rdkit import Chem
+from rdkit.Chem import rdMolDescriptors
+from rdkit.DataStructs.cDataStructs import ExplicitBitVect
+
+
+def fingerprint_to_bitarray(fp):
+    return np.array([fp.GetBit(i) for i in range(fp.GetNumBits())], dtype=np.uint8)
+
+
+def bitarray_to_fingerprint(bitarray, fp):
+    new_fp = ExplicitBitVect(fp.GetNumBits())
+    for i, bit in enumerate(bitarray):
+        if bit:
+            new_fp.SetBit(i)
+    return new_fp
+
+
+def bitwise_or_fingerprint(fp1: ExplicitBitVect, fp2: ExplicitBitVect) -> ExplicitBitVect:
+    """Bitwise OR operation on two fingerprints.
+
+    Parameters
+    ----------
+    fp1 : ExplicitBitVect
+        First fingerprint.
+    fp2 : ExplicitBitVect
+        Second fingerprint.
+
+    Returns
+    -------
+    ExplicitBitVect
+        Bitwise OR of two fingerprints.
+    """
+    bitarray1 = fingerprint_to_bitarray(fp1)
+    bitarray2 = fingerprint_to_bitarray(fp2)
+
+    bitarray_or = np.bitwise_or(bitarray1, bitarray2)
+    fp_or = bitarray_to_fingerprint(bitarray_or, fp1)
+
+    return fp_or
+
+
 def load_smiles(smiles_path=None):
     if os.path.exists(smiles_path):
         with open(smiles_path, "r") as f:
@@ -23,7 +64,7 @@ def load_smiles(smiles_path=None):
             f"SMILES file not found at {smiles_path}.")
 
 
-def download_smiles(pdb_id, download_path=None):
+def download_smiles_pdb(pdb_id, download_path=None):
     if os.path.exists(os.path.join(download_path, f"{pdb_id}.smiles")):
         print(f"Found SMILES for {pdb_id}")
         return
@@ -41,6 +82,46 @@ def download_smiles(pdb_id, download_path=None):
             f.write(smiles)
     else:
         raise ValueError(f"Could not find SMILES for PDB ID: {pdb_id}")
+
+
+def download_smiles_cid(cid, download_path=None):
+    if os.path.exists(os.path.join(download_path, f"{cid}.smiles")):
+        print(f"Found SMILES for {cid}")
+        return
+
+    url = f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/cid/{cid}/property/IsomericSMILES/TXT"
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        smiles = response.text.strip()
+        print(f"Found SMILES for {cid}")
+        # Save the SMILES
+        if download_path is None:
+            download_path = os.getcwd()
+        with open(os.path.join(download_path, f"{cid}.smiles"), "w") as f:
+            f.write(smiles)
+    else:
+        raise ValueError(f"Could not find SMILES for CID: {cid}")
+
+
+def download_smiles_ligand_name(name: str, download_path=None):
+    if os.path.exists(os.path.join(download_path, f"{name}.smiles")):
+        print(f"Found SMILES for {name}")
+        return
+
+    url = f'https://data.rcsb.org/rest/v1/core/chemcomp/{name.lower()}'
+    response = requests.get(url)
+
+    if response.status_code == 200:
+        data = response.json()
+        if 'rcsb_chem_comp_descriptor' in data:
+            if 'smiles' in data['rcsb_chem_comp_descriptor']:
+                smiles = data['rcsb_chem_comp_descriptor']['smiles']
+                print(f"Found SMILES for {name}")
+                with open(os.path.join(download_path, f"{name}.smiles"), "w") as f:
+                    f.write(smiles)
+                return
+    raise ValueError(f"Could not find SMILES for ligand name: {name}")
 
 
 def download_pdb(pdb_id, download_path=None):
