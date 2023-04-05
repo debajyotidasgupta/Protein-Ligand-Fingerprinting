@@ -53,7 +53,6 @@ class NeighbourFingerprint(BaseFingerprint):
                 # Update the fingerprint
                 fingerprints[pos][index] += 1
 
-        fingerprints += 1.
         return fingerprints
 
     def save_fingerprint(self, file_path):
