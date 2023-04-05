@@ -27,7 +27,8 @@ dataset_file = os.path.join(data_dir, "pdbbind_core_df.csv.gz")
 
 if not os.path.exists(dataset_file):
     print("File does not exist. Downloading file...")
-    download_url("https://s3-us-west-1.amazonaws.com/deepchem.io/datasets/pdbbind_core_df.csv.gz", dest_dir=data_dir)
+    download_url(
+        "https://s3-us-west-1.amazonaws.com/deepchem.io/datasets/pdbbind_core_df.csv.gz", dest_dir=data_dir)
     print("File downloaded!")
 
 raw_dataset = load_from_disk(dataset_file)
@@ -44,7 +45,7 @@ count = 0
 for pdb_id in pdb_ids:
     if count >= max_pdbs:
         break
-    count+=1
+    count += 1
     pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
     if os.path.exists(pdb_file):
         continue
@@ -60,16 +61,20 @@ labels = []
 count = 0
 
 for _, row in dataset.iterrows():
+    if count >= max_pdbs:
+        break
+    count += 1
     pdb_id = row['pdb_id']
     label = row['label']
 
     pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
     feature_output_file = os.path.join(fingerprints_dir, f"{pdb_id}.txt")
-    neighbour_feature_output_file = os.path.join(intermediate_dir, f"{pdb_id}.txt")
+    neighbour_feature_output_file = os.path.join(
+        intermediate_dir, f"{pdb_id}.txt")
 
     if os.path.exists(feature_output_file):
         fingerprint_array = np.loadtxt(feature_output_file)
-    
+
     elif os.path.exists(neighbour_feature_output_file):
         fingerprint_array = np.loadtxt(neighbour_feature_output_file)
 
@@ -77,7 +82,7 @@ for _, row in dataset.iterrows():
         fingerprint_array = encode(fingerprint_array, model_path=model_path)
 
         np.savetxt(feature_output_file, fingerprint_array, fmt='%1.8f')
-    
+
     else:
         # Create a new instance of the class
         protein_ligand_complex = ProteinLigandSideChainComplex()
@@ -89,10 +94,12 @@ for _, row in dataset.iterrows():
         fingerprint = NeighbourFingerprint(protein_ligand_complex)
 
         # save meighbout fingerprint in intermediate folder
-        np.savetxt(neighbour_feature_output_file, fingerprint.get_fingerprint(), fmt='%1.8f')
+        np.savetxt(neighbour_feature_output_file,
+                   fingerprint.get_fingerprint(), fmt='%1.8f')
 
         # obtain fixed length fingerprint (256 here)
-        fingerprint_array = encode(fingerprint.get_fingerprint(), model_path=model_path)
+        fingerprint_array = encode(
+            fingerprint.get_fingerprint(), model_path=model_path)
 
         # save the final fingerprint in fingerprints folder
         np.savetxt(feature_output_file, fingerprint_array, fmt='%1.8f')
@@ -112,7 +119,8 @@ labels = np.array(labels)
 
 # create dataset for prediction of binding affinity
 dataset = dc.data.NumpyDataset(X=features, y=labels, ids=pdb_ids)
-train_dataset, test_dataset = dc.splits.RandomSplitter().train_test_split(dataset, seed=random_seed)
+train_dataset, test_dataset = dc.splits.RandomSplitter(
+).train_test_split(dataset, seed=random_seed)
 
 # define the model
 sk_model = RandomForestRegressor(n_estimators=35, max_features="sqrt")
@@ -127,8 +135,10 @@ metric = dc.metrics.Metric(dc.metrics.pearson_r2_score)
 train_comparision = list(zip(model.predict(train_dataset), train_dataset.y))
 test_comparision = list(zip(model.predict(test_dataset), test_dataset.y))
 
-open(os.path.join(output_dir, 'binding_train_comparision.txt'), 'w').write(str(train_comparision))
-open(os.path.join(output_dir, 'binding_test_comparision.txt'), 'w').write(str(test_comparision))
+open(os.path.join(output_dir, 'binding_train_comparision.txt'),
+     'w').write(str(train_comparision))
+open(os.path.join(output_dir, 'binding_test_comparision.txt'),
+     'w').write(str(test_comparision))
 
 evaluator = Evaluator(model, train_dataset, [])
 train_r2score = evaluator.compute_model_performance([metric])
