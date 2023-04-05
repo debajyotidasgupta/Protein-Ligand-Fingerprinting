@@ -296,13 +296,10 @@ List of resources we found helpful and we would like to give them some credits.
 - [Protein-Ligand Interaction Fingerprints](https://pubs.acs.org/doi/10.1021/acs.jcim.9b00510)
 - [Snekmer: a scalable pipeline for protein sequence fingerprinting based on amino acid recoding](https://academic.oup.com/bioinformaticsadvances/article/3/1/vbad005/7024077)
 - [PDBBind dataset - 2019](http://www.pdbbind.org.cn/)
-- [PDB](https://www.rcsb.org/)
-- [SMILES](https://www.daylight.com/dayhtml/doc/theory/theory.smiles.html)
-- [KmerVec](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6300003/)
-- [Autoencoder](https://www.tensorflow.org/tutorials/generative/autoencoder)
-- [Transformer](https://www.tensorflow.org/tutorials/text/transformer)
-- [Pytorch](https://pytorch.org/)
-- [RDKit](https://www.rdkit.org/)
+- [Downloading PDB files](https://www.rcsb.org/)
+- [PUG REST API](https://pubchem.ncbi.nlm.nih.gov/docs/pug-rest)
+- [RCSB Data API for SMILES](https://data.rcsb.org)
+- [Transformer is all you need](https://arxiv.org/abs/1706.03762)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
