@@ -10,6 +10,7 @@ if __name__ == '__main__':
     PDB_DATA = config['PDB_DATA']
     SMILES_DATA = config['SMILES_DATA']
     OUTPUT_DATA = config['OUTPUT_DATA']
+    MODEL_PATH = config['MODEL_PATH']
 
     # Create a new instance of the class
     protein_ligand_complex = ProteinLigandSideChainComplex()
@@ -24,11 +25,11 @@ if __name__ == '__main__':
     fingerprint = NeighbourFingerprint(protein_ligand_complex)
 
     # encode the fingerprint using transformers model to get a constant length feature vector
-    # fingerprint = encode(fingerprint.get_fingerprint())
+    fingerprint = encode(fingerprint.get_fingerprint(), MODEL_PATH)
     # print(f"fingerprint shape = {fingerprint.shape}")
     # print(f"fingerprint: {fingerprint}")
 
-    print(fingerprint.get_fingerprint())
+    print(fingerprint)
 
     # # Save the fingerprint
     # fingerprint.save_fingerprint(

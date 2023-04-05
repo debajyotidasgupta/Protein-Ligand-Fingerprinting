@@ -237,7 +237,7 @@ def protein2seq(protein: Protein) -> str:
     return sequence
 
 
-def encode(fingerprints, model_path = 'output/models/AutoencoderTransformer_4.pt'):
+def encode(fingerprints, model_path):
     model = torch.load(model_path)
     reduce_dim = False
 

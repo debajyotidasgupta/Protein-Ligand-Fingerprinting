@@ -102,15 +102,11 @@ This project demonstrates the implementation of the `Protein Ligand Fingerprinti
 
 Following mentioned are the major frameworks/libraries used to bootstrap this project. Also included are the dependencies and addons used in this project.
 
-- [Golang](https://go.dev/)
-  - [Leak Test](github.com/fortytw2/leaktest) - _Required for memory leak testing_
-  - [Pretty Tables](github.com/jedib0t/go-pretty) - _Used in Timing Diagram visualization_
-  - [net/rpc](https://pkg.go.dev/net/rpc) - _Wrappers required for building Raft RPCs_
-- [Shell Script](https://www.javatpoint.com/shell-scripting-tutorial)
-
 - [Python](https://www.python.org/)
   - [Numpy](https://numpy.org/) - _The fingerprints are mainly stored as numpy vectors_
-  - [PyTorch](https://pytorch.org/) - _mainly required for the Transformer model_
+  - [PyTorch](https://pytorch.org/) - _Mainly required for the Transformer model_
+  - [scikit-learn](https://scikit-learn.org/stable/) - _Used for implementing RandomForestRegressor to predict binding affinity of protein-ligand complexes using our fingerprinting method_
+  - [DeepChem](https://deepchem.io/) - _Used to download pdbbind data for binding affinity of complexes_
 
 <p align="right">(<a href="#top">back to top</a>)</p>
 
@@ -119,33 +115,43 @@ Following mentioned are the major frameworks/libraries used to bootstrap this pr
 Following are the details of the file structure of this project:
 
 ```
-raft-consensus
-├──── LICENSE
-├──── README.md
-├──── go.mod
-├──── go.sum
-├──── images
-│     └── logo.png
-│     └── overall.png
-│     └── test1.png
-│     └── test2.png
-│     └── timing.png
-├──── main.go
-├──── raft
-│     ├── config.go
-│     ├── raft.go
-│     ├── raft_test.go
-│     ├── server.go
-│     ├── simulator.go
-│     └── storage.go
-└──── utils
-      ├── viz.go
-      ├── visualize.sh
-      ├── sample_logs.txt
-      └── sample_output.txt
+.
+├── data
+│   ├── PDB
+│   ├── pdbbind_core_df.csv.gz
+│   ├── pdb_files
+│   └── SMILES
+├── fingerprint
+│   ├── alphabets.py
+│   ├── base.py
+│   ├── __init__.py
+│   ├── interactions.py
+│   ├── kmer.py
+│   ├── neighbour.py
+│   ├── parser.py
+│   ├── __pycache__
+│   ├── transformer.py
+│   └── utils.py
+├── gen_fingerprint.py
+├── images
+│   └── protein.jpeg
+├── LICENSE
+├── main.py
+├── ML
+│   ├── binding_affinity_prediction.py
+│   └── similarity.py
+├── output
+│   ├── fingerprints
+│   ├── intermediate
+│   └── models
+├── README.md
+├── requirements.txt
+├── train.py
 ```
 
 Following are the details of the file structure and their functionalities that are present in this code base.
+
+- **fingerprint/
 
 - **raft/server.go** - _This file contains all the necessary code for implementing servers in a network using TCP along with various Remote Procedural Calls_
   - `Server struct` - Structure to define a service object
