@@ -11,7 +11,7 @@ from deepchem.utils import download_url, load_from_disk
 from fingerprint import *
 
 config = dotenv_values(".env")
-data_dir = config['PDB_DATA']
+data_dir = config['DATA_ROOT']
 intermediate_dir = config['INTERMEDIATE_DIR']
 model_path = config['MODEL_PATH']
 random_seed = int(config['RANDOM_SEED'])
