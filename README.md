@@ -37,10 +37,10 @@ python3 main.py --pdb ./data/2xni.pdb --output output/2xni.txt
     <img src="./images/logo.png" alt="Logo">
   </a>
 
-  <h3 align="center">Raft Consensus</h3>
+  <h3 align="center">Protein Ligand Fingerprinting</h3>
 
   <p align="center">
-    A prototype for demonstrating the raft consensus algorithm.
+    Methods to obtain fingerprint for a protein-ligand complex.
     <br />
     <a href="https://github.com/debajyotidasgupta/Protein-Ligand-Fingerprinting/wiki"><strong>Explore the docs »</strong></a>
     <br />
