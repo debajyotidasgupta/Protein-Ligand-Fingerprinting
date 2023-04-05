@@ -5,10 +5,63 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 
-from fingerprint.transformer import *
+from dotenv import dotenv_values
+from deepchem.utils import download_url, load_from_disk
+import requests
 
-fingerprints_dir = 'output/fingerprints'
-models_dir = 'output/models'
+from fingerprint import *
+from fingerprint import *
+
+data_dir = './data'
+fingerprints_dir = './output/fingerprints'
+models_dir = './models/AutoencoderTransformer_4.pt'
+
+def generate_neighbour_fingerprints():
+    dataset_file = os.path.join(data_dir, "pdbbind_core_df.csv.gz")
+
+    if not os.path.exists(dataset_file):
+        print("File does not exist. Downloading file...")
+        download_url("https://s3-us-west-1.amazonaws.com/deepchem.io/datasets/pdbbind_core_df.csv.gz", dest_dir=data_dir)
+        print("File downloaded!")
+    
+    raw_dataset = load_from_disk(dataset_file)
+    dataset = raw_dataset[['pdb_id']]
+
+    protein_ligand_dir = os.path.join(data_dir, 'pdb_files')
+    if not os.path.isdir(protein_ligand_dir):
+        os.mkdir(protein_ligand_dir)
+
+    pdb_ids = dataset['pdb_id']
+
+    for pdb_id in pdb_ids:
+        pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
+        if os.path.exists(pdb_file):
+            continue
+        url = f"http://files.rcsb.org/download/{pdb_id}.pdb"
+        res = requests.get(url, allow_redirects=True)
+        if res.status_code == 200:
+            open(pdb_file, "wb").write(res.content)
+
+    for pbd_id in pdb_ids:
+
+        pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
+        feature_output_file = os.path.join(fingerprints_dir, f"{pdb_id}.txt")
+
+        if os.path.exists(feature_output_file):
+            continue
+        
+        else:
+            # Create a new instance of the class
+            protein_ligand_complex = ProteinLigandSideChainComplex()
+
+            # Load the PDB file
+            protein_ligand_complex.load_pdb(pdb_file)
+
+            # obtain the protein fingerprint
+            fingerprint = NeighbourFingerprint(protein_ligand_complex)
+            fingerprint_array = fingerprint.get_fingerprint()
+
+            np.savetxt(feature_output_file, fingerprint_array, fmt='%1.8f')
 
 def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256, epochs=5):
     model = AutoencoderTransformer(input_dim=input_dim, hidden_dim=hidden_dim, 
@@ -44,7 +97,16 @@ def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256,
         torch.save(model, os.path.join(models_dir,f"AutoencoderTransformer_{epoch}.pt"))
 
 if __name__ == "__main__":
-    print("here")
+    config = dotenv_values(".env")
+    data_dir = config['DATA_ROOT']
+    fingerprints_dir = config['FINGERPRINTS_DIR']
+    models_dir = config['MODEL_PATH']
+
+    if not os.path.isdir(data_dir):
+        os.mkdir(data_dir)
+    if not os.path.isdir(fingerprints_dir):
+        os.mkdir(fingerprints_dir)
+
     parser = argparse.ArgumentParser()
     parser.add_argument('-i', '--input_dim', default=5)
     parser.add_argument('-hi', '--hidden_dim', default=32)
