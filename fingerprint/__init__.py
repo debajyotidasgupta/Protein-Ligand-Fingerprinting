@@ -4,3 +4,4 @@ from .neighbour import *
 from .parser import *
 from .kmer import *
 from .alphabets import *
+from .ligand import *
