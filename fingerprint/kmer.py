@@ -182,17 +182,10 @@ class KmerVec:
         kmers = list(self._kmer_gen(sequence))
         kmer2count = Counter(kmers)
 
-        # Convert to vector of counts
-        # vector = np.zeros(N)
-
-        # memfix change
         vector = defaultdict(int)
 
         for i, word in enumerate(self.kmer_set.kmers):
             vector[i] += kmer2count[word]
-
-        # Convert to frequencies
-        # vector /= sum(kmer2count.values())
 
         return dict(vector)
 
@@ -207,30 +200,10 @@ class KmerVec:
         NDArray
             Vector representation of sequence as reduced kmer vector.
         """
-        # N = len(self.char_set) ** self.k
 
         reduced = reduce(sequence, alphabet=self.alphabet,
                          mapping=FULL_ALPHABETS)
-        kmers = list(self._kmer_gen(reduced))
-        # kmer2count = Counter(kmers)
-
-        vector = np.array(kmers, dtype=str)
-
-        # memfix change
-        # this changes the output from a list to a dict
-        # vector = {}
-        # for kmer in kmers:
-        #    vector[kmer] = 1
-
-        # Convert to vector of counts
-        # vector = np.zeros(N)
-        # for i, word in enumerate(self.kmer_set.kmers):
-        #    vector[i] += kmer2count[word]
-
-        # Convert to frequencies
-        # vector /= sum(kmer2count.values())
-
-        return vector
+        return self.vectorize(reduced)
 
     def harmonize(self, record, kmerlist):
         """_summary_

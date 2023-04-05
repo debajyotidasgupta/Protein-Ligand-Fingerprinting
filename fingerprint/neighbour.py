@@ -54,8 +54,7 @@ class NeighbourFingerprint(BaseFingerprint):
                 fingerprints[pos][index] += 1
 
         fingerprints += 1.
-        # return fingerprints / np.sum(fingerprints, axis=0, keepdims=True)
-        return fingerprints / math.pow(distance, 3)
+        return fingerprints
 
     def save_fingerprint(self, file_path):
         np.savetxt(file_path, self.fingerprint, fmt='%1.8f')

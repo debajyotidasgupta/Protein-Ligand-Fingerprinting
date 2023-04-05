@@ -1,5 +1,7 @@
 import os
 import sys
+import json
+import numpy as np
 from dotenv import dotenv_values
 from fingerprint import *
 
@@ -12,6 +14,73 @@ if __name__ == '__main__':
     OUTPUT_DATA = config['OUTPUT_DATA']
     MODEL_PATH = config['MODEL_PATH']
 
+    # if output dir with name of PDB ID does not exist, create it
+    if not os.path.exists(os.path.join(OUTPUT_DATA, pdb)):
+        os.mkdir(os.path.join(OUTPUT_DATA, pdb))
+
+    print("""\033[2J
+    ┌──────────────────────────────────────────────┐
+    │                                              │
+    │         Protein Ligand Fingerprints          │
+    │                                              │
+    ┠──────────────────────────────────────────────┨
+    │                                              │
+    │  This script generates the protein ligand    │
+    │  fingerprints for the given PDB ID.          │
+    │                                              │
+    │  Author:                                     │
+    │  - Debajyoti Dasgupta [18CS30051]            │
+    │    (debajyotidasgupta6@gmail.com)            │
+    │  - Somnath Jena [18CS30047]                  │
+    │    (somnathjena.2011@gmail.com)              │
+    │                                              │
+    │  Subject: Computational Biopysics            │
+    │           Algorithms to Applications         │
+    │           (CS61060)                          │
+    |                                              |
+    │  Date: 2023-04-05                            │
+    │  Semester: 2022-23 Autumn                    │
+    │                                              │
+    ┠──────────────────────────────────────────────┨
+    │  Disclaimer:                                 │
+    │  - This script is for academic purposes      │
+    │    only.                                     │
+    │  - The authors are not responsible for any   │
+    │    misuse of this script.                    │
+    │  - The authors are not responsible for any   │
+    │    damage, loss of data, or any other        │
+    │    consequences of using this script.        │
+    │                                              │
+    └──────────────────────────────────────────────┘
+    \n
+    ──────────────────────────────────────
+
+    Note:
+
+    - For changes to parameters, please
+      edit the .env file's values.
+    - Read the README.md file for more
+
+    ──────────────────────────────────────
+    """)
+
+    print("""
+    ┌──────────────────────────────────────────────┐
+    │                                              │
+    │    Protein Ligand Neighbour Fingerprint      │
+    │                                              │
+    ┠──────────────────────────────────────────────┨
+    │                                              │
+    │  For each atom in the ligand, find the       │
+    │  protein atoms within a cutoff distance      │
+    │  The fingerprint is a normalized vector      │
+    │  of the number of atoms in  each of the      │
+    │  20 amino acid types.                        │
+    │                                              │
+    └──────────────────────────────────────────────┘
+    \n
+    """)
+
     # Create a new instance of the class
     protein_ligand_complex = ProteinLigandSideChainComplex()
 
@@ -23,29 +92,86 @@ if __name__ == '__main__':
 
     # Print the protein fingerprint
     fingerprint = NeighbourFingerprint(protein_ligand_complex)
+    fingerprint = fingerprint.get_fingerprint()
+    print(f"\nFingerprint shape = {fingerprint.shape}")
+    print(f'Fingerprint:\n{fingerprint}')
+
+    print(
+        f"\n═════▷ Saving fingerprint to {os.path.join(OUTPUT_DATA, pdb, f'{pdb}_neighbour.txt')} ◁═════")
+    np.savetxt(os.path.join(OUTPUT_DATA, pdb,
+               f'{pdb}_neighbour.txt'), fingerprint)
+
+    print(f"\n────────────────────────────────────────────────────\n")
+
+    print(f"""
+    ┌──────────────────────────────────────────────┐
+    │                                              │
+    │    Protein Ligand Neighbour Fingerprint      │
+    │            (Transformer Encoded)             │
+    │                                              │
+    ┠──────────────────────────────────────────────┨
+    │                                              │
+    │  Use a pre-trained transformer (explained    │
+    │  in the README) to encode the fingerprint    │
+    │  to a constant length feature vector.        │
+    │                                              │
+    └──────────────────────────────────────────────┘
+    \n
+    """)
 
     print(fingerprint.get_fingerprint())
 
     # encode the fingerprint using transformers model to get a constant length feature vector
-    fingerprint = encode(fingerprint.get_fingerprint(), MODEL_PATH)
-    # print(f"fingerprint shape = {fingerprint.shape}")
-    # print(f"fingerprint: {fingerprint}")
+    fingerprint = encode(fingerprint, MODEL_PATH)
+    print(f"Fingerprint shape = {fingerprint.shape}")
+    print(f"Fingerprint:\n{np.array2string(fingerprint, threshold=100)}")
 
-    print(fingerprint)
+    print(
+        f"\n═════▷ Saving fingerprint to {os.path.join(OUTPUT_DATA, pdb, f'{pdb}_neighbour_transformer.txt')} ◁═════")
+    np.savetxt(os.path.join(OUTPUT_DATA, pdb,
+                            f'{pdb}_neighbour_transformer.txt'), fingerprint)
 
-    # # Save the fingerprint
-    # fingerprint.save_fingerprint(
-    #     os.path.join(OUTPUT_DATA, f'{pdb}.txt'))
+    print(f"\n────────────────────────────────────────────────────\n")
 
-    # Print the protein
-    seq = protein2seq(protein_ligand_complex.protein)
-    vec = KmerVec(0, k=2)
+    print(f"""
+    ┌──────────────────────────────────────────────┐
+    │                                              │
+    │       AAR Kmer based Fingerprint             │
+    │                                              │
+    ┠──────────────────────────────────────────────┨
+    │                                              │
+    │  Amino Acid Recoding (AAR) is a method       │
+    │  to convert the amino acid sequence into a   │
+    │  sequence of feature based on the chemical   │
+    │  properties of the amino acids.              │
+    │                                              │
+    │  The fingerprint is a vector of the number   │
+    │  of times each of the k-mers appear in the   │
+    │  AAR sequence.                               │
+    │                                              │
+    └──────────────────────────────────────────────┘
+    \n
+    """)
+    # Print the protein fingerprint
+    seq = pdb_seq(pdb, PDB_DATA)
+    vec = KmerVec(int(config['AAR_TYPE_NUM']), int(config['KMER_SIZE']))
     vec.set_kmer_set()
-    print(vec.vectorize(seq))
+    fingerprint = vec.reduce_vectorize(seq)
+    print(
+        f"\nAAR type = {int(config['AAR_TYPE_NUM'])} | Kmer size = {config['KMER_SIZE']}")
+    print(f"Fingerprint length = {len(fingerprint)}")
+    print(f'Fingerprint:\n{json.dumps(fingerprint, indent=4)}')
 
-    # Print the ligand Fingerprint
-    fp = get_ligand_fingerprint(pdb=pdb,
-                                smiles_path=SMILES_DATA,
-                                pdb_path=PDB_DATA)
+    print(
+        f"\n═════▷ Saving fingerprint to {os.path.join(OUTPUT_DATA, pdb, f'{pdb}_aar_kmer.json')} ◁═════")
+    with open(os.path.join(OUTPUT_DATA, pdb, f'{pdb}_aar_kmer.json'), 'w') as f:
+        json.dump(fingerprint, f, indent=4)
 
-    print(fp.ToBitString())
+    print(f"\n────────────────────────────────────────────────────\n")
+
+    # # Print the ligand Fingerprint
+    # fp = get_ligand_fingerprint(pdb=pdb,
+    #                             smiles_path=SMILES_DATA,
+    #                             pdb_path=PDB_DATA)
+
+    # print(fp.ToBitString())

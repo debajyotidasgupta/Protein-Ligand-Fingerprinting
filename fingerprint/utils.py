@@ -221,27 +221,33 @@ IUPAC_3_to_1 = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
                 'ALA': 'A', 'VAL': 'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'}
 
 
-def protein2seq(protein: Protein) -> str:
-    """Convert a protein object into a sequence string.
-
+def pdb_seq(pdb: str, pdb_path: str) -> str:
+    """Extracts the sequence from a pdb file.
     Args:
-        protein (Protein): The protein object.
-
+        pdb: pdb id
+        pdb_path: path to the pdb file
     Returns:
-        str: The sequence string.
+        seq: sequence of the pdb file
     """
-    sequence = ""
-    for atom in protein.atoms:
-        if atom.get_atom_name() == "CA":
-            sequence += IUPAC_3_to_1[atom.get_residue_name()]
-    return sequence
+    download_pdb(pdb, pdb_path)
+
+    print(f"Extracting sequence from {pdb}.pdb")
+    seq = ''
+    with open(os.path.join(pdb_path, f"{pdb}.pdb"), 'r') as f:
+        for line in f:
+            if line.startswith('SEQRES'):
+                AAs = line[19:].split()
+                for aa in AAs:
+                    if aa in IUPAC_3_to_1.keys():
+                        seq += IUPAC_3_to_1[aa]
+    return seq
 
 
 def encode(fingerprints, model_path):
     model = torch.load(model_path)
     reduce_dim = False
 
-    if isinstance(fingerprints,np.ndarray) and fingerprints.ndim==2:
+    if isinstance(fingerprints, np.ndarray) and fingerprints.ndim == 2:
         fingerprints = [fingerprints]
         reduce_dim = True
 
@@ -257,10 +263,8 @@ def encode(fingerprints, model_path):
         input = data
         output, _ = model(input)
         outputs.append(torch.squeeze(output).detach().numpy())
-    
+
     if reduce_dim:
         outputs = outputs[0]
-    
+
     return outputs
-
-
