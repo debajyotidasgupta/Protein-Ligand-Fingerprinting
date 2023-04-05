@@ -24,6 +24,8 @@ if __name__ == '__main__':
     # Print the protein fingerprint
     fingerprint = NeighbourFingerprint(protein_ligand_complex)
 
+    print(fingerprint.get_fingerprint())
+
     # encode the fingerprint using transformers model to get a constant length feature vector
     fingerprint = encode(fingerprint.get_fingerprint(), MODEL_PATH)
     # print(f"fingerprint shape = {fingerprint.shape}")

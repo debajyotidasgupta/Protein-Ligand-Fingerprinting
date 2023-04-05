@@ -59,6 +59,7 @@ for _, row in dataset.iterrows():
         fingerprint_array = np.loadtxt(feature_output_file)
     
     else:
+        continue
         # Create a new instance of the class
         protein_ligand_complex = ProteinLigandSideChainComplex()
 
@@ -84,13 +85,13 @@ def cosine_similarity(feature1, feature2):
 for i in range(0, len(features)):
 
     if i==0:
-        print("Processing compounf ", end='')
+        print("Processing compound ", end='')
     
     if i%10==0:
         print(i, end=' ')
     
     for j in range(i+1, len(features)):
-        scores.append(features[i], features[j])
+        scores.append(cosine_similarity(features[i], features[j]))
     
 print("Done!")
 print("# of scores : ", len(scores))
