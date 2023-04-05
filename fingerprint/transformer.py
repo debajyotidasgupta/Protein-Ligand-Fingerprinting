@@ -1,7 +1,5 @@
-import math
 import torch
 import torch.nn as nn
-random_seed = 42
 
 class AutoencoderTransformer(nn.Module):
     def __init__(self, input_dim, hidden_dim, num_layers, num_heads, output_dim):
