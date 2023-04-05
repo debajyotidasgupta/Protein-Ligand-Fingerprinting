@@ -35,7 +35,7 @@ class NeighbourFingerprint(BaseFingerprint):
         atoms = self.get_pdb().ligand.get_atoms()
 
         # Create fingerprint
-        fingerprints = np.zeros((len(protein.atoms), 5))
+        fingerprints = np.zeros((len(atoms), 5))
 
         # Iterate over the atoms
         for pos, atom in tqdm(list(enumerate(atoms)), desc='Parsing Neighbours'):
