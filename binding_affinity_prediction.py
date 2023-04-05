@@ -104,10 +104,10 @@ for _, row in dataset.iterrows():
 pdb_ids = np.array(pdb_ids)
 
 # pad to maximum length if all fingerprints are not of same length
-max_shape = tuple(max(i) for i in zip(*[a.shape for a in features]))
-padded_arrays = [np.pad(a, [(0, max_shape[0] - a.shape[0]), (0, max_shape[1] - a.shape[1])], 'constant') for a in features]
-padded_arrays = [a.reshape(a.shape[0]*a.shape[1]) for a in padded_arrays]
-features = np.stack(padded_arrays)
+# max_shape = tuple(max(i) for i in zip(*[a.shape for a in features]))
+# padded_arrays = [np.pad(a, [(0, max_shape[0] - a.shape[0]), (0, max_shape[1] - a.shape[1])], 'constant') for a in features]
+# padded_arrays = [a.reshape(a.shape[0]*a.shape[1]) for a in padded_arrays]
+features = np.stack(features)
 labels = np.array(labels)
 
 # create dataset for prediction of binding affinity

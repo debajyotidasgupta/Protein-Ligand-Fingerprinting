@@ -132,6 +132,8 @@ dmypy.json
 data/pdb_files
 output/fingerprints
 output/intermediate
+output/fingerprints_final
+output/intermediate_final
 output/models/AutoencoderTransformer_0.pt
 output/models/AutoencoderTransformer_1.pt
 output/models/AutoencoderTransformer_2.pt
