@@ -1,10 +1,8 @@
-# Protein-Ligand-Fingerprinting
+# Deep-ProLiPrint: Protein Ligand Fingerprinting
 
 ```python
 python3 gen_fingerprint.py 2xni.pdb
 ```
-
-# Protein-Ligand-Fingerprinting
 
 <div id="top"></div>
 <!--
