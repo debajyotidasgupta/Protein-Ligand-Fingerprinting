@@ -57,20 +57,23 @@ for pdb_id in pdb_ids:
 
 pdb_ids = []
 features = []
+count = 0
 
 for _, row in dataset.iterrows():
     pdb_id = row['pdb_id']
+
+    if count >= max_pdbs:
+        break
+
+    count += 1
 
     pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
     feature_output_file = os.path.join(fingerprints_dir, f"{pdb_id}.txt")
 
     if os.path.exists(feature_output_file):
         fingerprint_array = np.loadtxt(feature_output_file)
-        pdb_ids.append(pdb_id)
-        features.append(fingerprint_array)
 
     else:
-        continue
         # Create a new instance of the class
         protein_ligand_complex = ProteinLigandSideChainComplex()
 
@@ -86,8 +89,8 @@ for _, row in dataset.iterrows():
 
         np.savetxt(feature_output_file, fingerprint_array, fmt='%1.8f')
 
-    # pdb_ids.append(pdb_id)
-    # features.append(fingerprint_array)
+    pdb_ids.append(pdb_id)
+    features.append(fingerprint_array)
 
 cosine_scores = []
 euclidean_scores = []
@@ -124,23 +127,8 @@ with open(os.path.join(output_dir, 'cosine.txt'), 'w') as f:
 
 mybins = [x * 0.01 for x in range(101)]
 
-# fig = plt.figure(figsize=(8,4), dpi=300)
 
-# plt.subplot(1, 2, 1)
-# plt.title("Distribution")
-# plt.hist(cosine_scores, bins=mybins)
+plt.hist(euclidean_scores, bins=mybins, density=True, cumulative=1)
+plt.show()
 
-# plt.subplot(1, 2, 2)
-# plt.title("Cumulative Distribution")
-# plt.hist(cosine_scores, bins=mybins, density=True, cumulative=1)
-# plt.plot([0,1],[0.95,0.95])
-
-# plt.show()
-
-for i in range(21):
-    thresh = i / 20
-    num_similar_pairs = len([x for x in cosine_scores if x >= thresh])
-    prob = num_similar_pairs / len(cosine_scores) * 100
-    print("%.3f %8d (%8.4f %%)" % (thresh, num_similar_pairs, round(prob, 4)))
-
-print("Average:", sum(cosine_scores)/len(cosine_scores))
+print("Average Euclidean distance : ", np.mean(euclidean_scores))
