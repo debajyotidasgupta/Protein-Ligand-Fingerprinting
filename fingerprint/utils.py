@@ -18,10 +18,36 @@ from rdkit.DataStructs.cDataStructs import ExplicitBitVect
 
 
 def fingerprint_to_bitarray(fp):
+    """Converts an ExplicitBitVect to a numpy array of 0s and 1s.
+
+    Parameters
+    ----------
+    fp : ExplicitBitVect
+        Fingerprint to convert.
+
+    Returns
+    -------
+    np.array
+        Numpy array of 0s and 1s.   
+    """
     return np.array([fp.GetBit(i) for i in range(fp.GetNumBits())], dtype=np.uint8)
 
 
 def bitarray_to_fingerprint(bitarray, fp):
+    """Converts a numpy array of 0s and 1s to an ExplicitBitVect.
+
+    Parameters
+    ----------
+    bitarray : np.array
+        Numpy array of 0s and 1s.
+    fp : ExplicitBitVect
+        Fingerprint to convert.
+
+    Returns
+    -------
+    ExplicitBitVect
+        Fingerprint.
+    """
     new_fp = ExplicitBitVect(fp.GetNumBits())
     for i, bit in enumerate(bitarray):
         if bit:
@@ -54,6 +80,17 @@ def bitwise_or_fingerprint(fp1: ExplicitBitVect, fp2: ExplicitBitVect) -> Explic
 
 
 def load_smiles(smiles_path=None):
+    """Load SMILES from a file.
+
+    Parameters
+    ----------
+    smiles_path : str, optional
+        Path to SMILES file, by default None
+
+    Returns
+    -------
+    str
+    """
     if os.path.exists(smiles_path):
         with open(smiles_path, "r") as f:
             smiles = f.read().strip()

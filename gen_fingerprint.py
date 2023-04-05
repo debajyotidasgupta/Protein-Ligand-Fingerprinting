@@ -92,7 +92,7 @@ if __name__ == '__main__':
     protein_ligand_complex.load_pdb(os.path.join(PDB_DATA, f'{pdb}.pdb'))
 
     # Print the protein fingerprint
-    fingerprint = NeighbourFingerprint(protein_ligand_complex, distance=7.)
+    fingerprint = NeighbourFingerprint(protein_ligand_complex, distance=10.)
     fingerprint = fingerprint.get_fingerprint()
     print(f"\nFingerprint shape = {fingerprint.shape}")
     print(f'Fingerprint:\n{fingerprint}')
