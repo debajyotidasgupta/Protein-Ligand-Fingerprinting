@@ -244,27 +244,42 @@ def pdb_seq(pdb: str, pdb_path: str) -> str:
 
 
 def encode(fingerprints, model_path):
-    model = torch.load(model_path)
-    reduce_dim = False
+    """Encode a list of fingerprints using a trained model.
 
+    Args:
+        fingerprints (list): A list of fingerprints.
+        model_path (str): Path to the trained model.
+
+    Returns:
+        list: A list of encoded fingerprints.
+    """
+    model = torch.load(model_path)  # load the model from the path
+    reduce_dim = False  # if the input is a single fingerprint, reduce the output dimension
+
+    # if the input is a list of fingerprints
     if isinstance(fingerprints, np.ndarray) and fingerprints.ndim == 2:
+        # convert the input to a list of fingerprints
         fingerprints = [fingerprints]
-        reduce_dim = True
+        reduce_dim = True   # reduce the output dimension
 
+    # convert the fingerprints to tensors
     data_loader = [torch.from_numpy(x) for x in fingerprints]
+    # add a dimension to the tensors
     data_loader = [torch.unsqueeze(x, 0) for x in data_loader]
-    data_loader = [x.to(torch.float) for x in data_loader]
+    data_loader = [x.to(torch.float)
+                   for x in data_loader]  # convert the tensors to float
 
-    model.eval()
+    model.eval()    # set the model to evaluation mode
 
-    outputs = []
+    outputs = []   # initialize the output list
 
-    for i, data in enumerate(data_loader, 0):
-        input = data
-        output, _ = model(input)
+    for _, data in enumerate(data_loader, 0):   # iterate over the fingerprints
+        input = data    # get the input
+        output, _ = model(input)    # get the output
+        # append the output to the output list
         outputs.append(torch.squeeze(output).detach().numpy())
 
-    if reduce_dim:
-        outputs = outputs[0]
+    if reduce_dim:  # if the input is a single fingerprint, reduce the output dimension
+        outputs = outputs[0]    # return a single fingerprint
 
-    return outputs
+    return outputs  # return the encoded fingerprints
