@@ -11,14 +11,14 @@ from fingerprint import *
 
 config = dotenv_values(".env")
 data_dir = config['DATA_ROOT']
-intermediate_dir = config['INTERMEDIATE_DIR']
+fingerprints_dir = config['FINGERPRINTS_DIR']
 model_path = config['MODEL_PATH']
 random_seed = int(config['RANDOM_SEED'])
 
 if not os.path.isdir(data_dir):
     os.mkdir(data_dir)
-if not os.path.isdir(intermediate_dir):
-    os.mkdir(intermediate_dir)
+if not os.path.isdir(fingerprints_dir):
+    os.mkdir(fingerprints_dir)
 
 dataset_file = os.path.join(data_dir, "pdbbind_core_df.csv.gz")
 
@@ -54,7 +54,7 @@ for _, row in dataset.iterrows():
     label = row['label']
 
     pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
-    feature_output_file = os.path.join(intermediate_dir, f"{pdb_id}.txt")
+    feature_output_file = os.path.join(fingerprints_dir, f"{pdb_id}.txt")
 
     if os.path.exists(feature_output_file):
         fingerprint_array = np.loadtxt(feature_output_file)

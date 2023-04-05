@@ -13,8 +13,10 @@ from fingerprint import *
 from fingerprint import *
 
 data_dir = './data'
+intermediate_dir = './output/intermediate'
 fingerprints_dir = './output/fingerprints'
-models_dir = './models/AutoencoderTransformer_4.pt'
+models_dir = './models'
+max_pdbs = 100
 
 def generate_neighbour_fingerprints():
     dataset_file = os.path.join(data_dir, "pdbbind_core_df.csv.gz")
@@ -42,10 +44,16 @@ def generate_neighbour_fingerprints():
         if res.status_code == 200:
             open(pdb_file, "wb").write(res.content)
 
-    for pbd_id in pdb_ids:
+    count = 0
+    for pdb_id in pdb_ids:
+
+        if count >= max_pdbs:
+            break
+
+        count+=1
 
         pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
-        feature_output_file = os.path.join(fingerprints_dir, f"{pdb_id}.txt")
+        feature_output_file = os.path.join(intermediate_dir, f"{pdb_id}.txt")
 
         if os.path.exists(feature_output_file):
             continue
@@ -70,8 +78,8 @@ def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256,
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
     fingerprints = []
-    for file in os.listdir(fingerprints_dir):
-        fingerprints.append(np.loadtxt(os.path.join(fingerprints_dir, file)))
+    for file in os.listdir(intermediate_dir):
+        fingerprints.append(np.loadtxt(os.path.join(intermediate_dir, file)))
 
     train_loader = [torch.from_numpy(x) for x in fingerprints]
     train_loader = [torch.unsqueeze(x, 0) for x in train_loader]
@@ -99,8 +107,10 @@ def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256,
 if __name__ == "__main__":
     config = dotenv_values(".env")
     data_dir = config['DATA_ROOT']
+    intermediate_dir = config['INTERMEDIATE_DIR']
     fingerprints_dir = config['FINGERPRINTS_DIR']
-    models_dir = config['MODEL_PATH']
+    models_dir = config['MODEL_DIR']
+    max_pdbs = int(config['MAX_PDBS'])
 
     if not os.path.isdir(data_dir):
         os.mkdir(data_dir)
@@ -115,5 +125,7 @@ if __name__ == "__main__":
     parser.add_argument('-o', '--output_dim', default=256)
     parser.add_argument('-e', '--epochs', default=5)
     args = parser.parse_args()
+
+    generate_neighbour_fingerprints()
 
     train(args.input_dim, args.hidden_dim, args.num_layers, args.num_heads, args.output_dim, args.epochs)
