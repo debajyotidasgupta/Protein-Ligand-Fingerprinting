@@ -4,6 +4,7 @@ import argparse
 import torch
 import torch.nn as nn
 import torch.optim as optim
+from sklearn.model_selection import train_test_split
 
 from dotenv import dotenv_values
 from deepchem.utils import download_url, load_from_disk
@@ -17,6 +18,7 @@ intermediate_dir = './output/intermediate'
 fingerprints_dir = './output/fingerprints'
 models_dir = './models'
 max_pdbs = 100
+random_seed = 42
 
 def generate_neighbour_fingerprints():
     dataset_file = os.path.join(data_dir, "pdbbind_core_df.csv.gz")
@@ -71,7 +73,7 @@ def generate_neighbour_fingerprints():
 
             np.savetxt(feature_output_file, fingerprint_array, fmt='%1.8f')
 
-def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256, epochs=5):
+def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256, epochs=10):
     model = AutoencoderTransformer(input_dim=input_dim, hidden_dim=hidden_dim, 
                                    num_layers=num_layers, num_heads=num_heads, output_dim=output_dim)
     criterion = nn.MSELoss()
@@ -80,10 +82,18 @@ def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256,
     fingerprints = []
     for file in os.listdir(intermediate_dir):
         fingerprints.append(np.loadtxt(os.path.join(intermediate_dir, file)))
+    
+    fingerprints_train, fingerprints_test, _, _ = train_test_split(fingerprints, [0 for x in fingerprints], test_size=0.2, random_state=random_seed)
 
-    train_loader = [torch.from_numpy(x) for x in fingerprints]
+    train_loader = [torch.from_numpy(x) for x in fingerprints_train]
     train_loader = [torch.unsqueeze(x, 0) for x in train_loader]
     train_loader = [x.to(torch.float) for x in train_loader]
+
+    test_loader = [torch.from_numpy(x) for x in fingerprints_test]
+    test_loader = [torch.unsqueeze(x, 0) for x in test_loader]
+    test_loader = [x.to(torch.float) for x in test_loader]
+
+    min_loss = 1000000.0
 
     for epoch in range(epochs):
         running_loss = 0.0
@@ -98,11 +108,20 @@ def train(input_dim=5, hidden_dim=32, num_layers=2, num_heads=5, output_dim=256,
 
             running_loss += loss.item()
             if i % 20== 19:
-                print('[%d, %5d] loss: %.3f' %
+                print('[%d, %5d] training loss: %.3f' %
                     (epoch + 1, i + 1, running_loss / 20))
                 running_loss = 0.0
+        
+        model.eval()
+        for i, data in enumerate(test_loader, 0):
+            inputs = data
+            _, decoded = model(inputs)
+            loss = criterion(inputs, decoded)
+            if loss < min_loss:
+                min_loss = loss
+                print(f"min val loss = {min_loss}")
+                torch.save(model, os.path.join(models_dir,f"AutoencoderTransformer.pt"))
 
-        torch.save(model, os.path.join(models_dir,f"AutoencoderTransformer_{epoch}.pt"))
 
 if __name__ == "__main__":
     config = dotenv_values(".env")
@@ -111,6 +130,7 @@ if __name__ == "__main__":
     fingerprints_dir = config['FINGERPRINTS_DIR']
     models_dir = config['MODEL_DIR']
     max_pdbs = int(config['MAX_PDBS'])
+    random_seed = int(config['RANDOM_SEED'])
 
     if not os.path.isdir(data_dir):
         os.mkdir(data_dir)
@@ -118,12 +138,12 @@ if __name__ == "__main__":
         os.mkdir(fingerprints_dir)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--input_dim', default=5)
-    parser.add_argument('-hi', '--hidden_dim', default=32)
-    parser.add_argument('-l', '--num_layers', default=2)
-    parser.add_argument('-nh', '--num_heads', default=5)
-    parser.add_argument('-o', '--output_dim', default=256)
-    parser.add_argument('-e', '--epochs', default=5)
+    parser.add_argument('-i', '--input_dim', default=5, type=int)
+    parser.add_argument('-hi', '--hidden_dim', default=32, type=int)
+    parser.add_argument('-l', '--num_layers', default=2, type=int)
+    parser.add_argument('-nh', '--num_heads', default=5, type=int)
+    parser.add_argument('-o', '--output_dim', default=256, type=int)
+    parser.add_argument('-e', '--epochs', default=10, type=int)
     args = parser.parse_args()
 
     generate_neighbour_fingerprints()

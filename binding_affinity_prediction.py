@@ -12,8 +12,11 @@ from fingerprint import *
 config = dotenv_values(".env")
 data_dir = config['DATA_ROOT']
 fingerprints_dir = config['FINGERPRINTS_DIR']
+intermediate_dir = config['INTERMEDIATE_DIR']
 model_path = config['MODEL_PATH']
 random_seed = int(config['RANDOM_SEED'])
+max_pdbs = int(config['MAX_PDBS'])
+output_dir = config['OUTPUT_DATA']
 
 if not os.path.isdir(data_dir):
     os.mkdir(data_dir)
@@ -36,7 +39,12 @@ if not os.path.isdir(protein_ligand_dir):
 
 pdb_ids = dataset['pdb_id']
 
+count = 0
+
 for pdb_id in pdb_ids:
+    if count >= max_pdbs:
+        break
+    count+=1
     pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
     if os.path.exists(pdb_file):
         continue
@@ -49,15 +57,26 @@ pdb_ids = []
 features = []
 labels = []
 
+count = 0
+
 for _, row in dataset.iterrows():
     pdb_id = row['pdb_id']
     label = row['label']
 
     pdb_file = os.path.join(protein_ligand_dir, f"{pdb_id}.pdb")
     feature_output_file = os.path.join(fingerprints_dir, f"{pdb_id}.txt")
+    neighbour_feature_output_file = os.path.join(intermediate_dir, f"{pdb_id}.txt")
 
     if os.path.exists(feature_output_file):
         fingerprint_array = np.loadtxt(feature_output_file)
+    
+    elif os.path.exists(neighbour_feature_output_file):
+        fingerprint_array = np.loadtxt(neighbour_feature_output_file)
+
+        # obtain fixed length fingerprint (256 here)
+        fingerprint_array = encode(fingerprint_array, model_path=model_path)
+
+        np.savetxt(feature_output_file, fingerprint_array, fmt='%1.8f')
     
     else:
         # Create a new instance of the class
@@ -69,9 +88,13 @@ for _, row in dataset.iterrows():
         # obtain the protein fingerprint
         fingerprint = NeighbourFingerprint(protein_ligand_complex)
 
+        # save meighbout fingerprint in intermediate folder
+        np.savetxt(neighbour_feature_output_file, fingerprint.get_fingerprint(), fmt='%1.8f')
+
         # obtain fixed length fingerprint (256 here)
         fingerprint_array = encode(fingerprint.get_fingerprint(), model_path=model_path)
 
+        # save the final fingerprint in fingerprints folder
         np.savetxt(feature_output_file, fingerprint_array, fmt='%1.8f')
 
     pdb_ids.append(pdb_id)
@@ -98,8 +121,8 @@ metric = dc.metrics.Metric(dc.metrics.pearson_r2_score)
 train_comparision = list(zip(model.predict(train_dataset), train_dataset.y))
 test_comparision = list(zip(model.predict(test_dataset), test_dataset.y))
 
-# open(os.path.join(output_dir, 'train_comparision'), 'w').write(str(train_comparision))
-# open(os.path.join(output_dir, 'test_comparision'), 'w').write(str(test_comparision))
+open(os.path.join(output_dir, 'binding_train_comparision.txt'), 'w').write(str(train_comparision))
+open(os.path.join(output_dir, 'binding_test_comparision.txt'), 'w').write(str(test_comparision))
 
 evaluator = Evaluator(model, train_dataset, [])
 train_r2score = evaluator.compute_model_performance([metric])
